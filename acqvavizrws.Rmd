@@ -1,9 +1,9 @@
 ---
-title: "Power Analysis with R - AcqVA Aurora Workshop"
+title: "Introduction to Power Analysis with R - AcqVA Aurora workshop"
 author: "Martin Schweinberger"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
-  bookdown::html_document2:  
+  bookdown::html_document2: 
 bibliography: bibliography.bib
 link-citations: yes
 ---
@@ -16,22 +16,225 @@ knitr::include_graphics("https://slcladal.github.io/images/acqvalab.png")
 
 # Introduction{-}
 
-This tutorial introduces power analysis using R. Power analysis is a method primarily used to determine the appropriate sample size for empirical studies. 
+This tutorial introduces power analysis for determining sample size using R with the aim of informing about the theoretical underpinnings, showcasing how to perform power analysis, and enabling participants on how to adapt, change, and modify data sets so that they can be fed into a power analysis using the `simr` [@simr]. 
 
-This tutorial is aimed at intermediate and advanced users of R with the aim of showcasing how to perform power analyses for mixed-effect models generated with the `lme4` package in R. The aim is not to provide a fully-fledged analysis but rather to show and exemplify a handy method for estimating the power of experimental and observational designs and how to implement this in R.
+```{r diff, echo=FALSE, out.width= "15%", out.extra='style="float:right; padding:10px"'}
+knitr::include_graphics("https://slcladal.github.io/images/y_chili.jpg")
+```
 
-
+This tutorial is aimed at intermediate users of R. The aim is not to provide a fully-fledged guide but rather to show and exemplify how to perform a power analysis for a generalized linear mixed-effects modelas this is the most common type of analysis for experimental studies.
 
 
 <div class="warning" style='padding:0.1em; background-color:#f2f2f2; color:#51247a'>
 <span>
 <p style='margin-top:1em; text-align:center'>
-The entire R Notebook for the tutorial can be downloaded [**here**](https://slcladal.github.io/pwr.Rmd).  If you want to render the R Notebook on your machine, i.e. knitting the document to html or a pdf, you need to make sure that you have R and RStudio installed and you also need to download the [**bibliography file**](https://slcladal.github.io/bibliography.bib) and store it in the same folder where you store the Rmd file. <br></p>
+The entire R Notebook for the tutorial can be downloaded [**here**](https://github.com/MartinSchweinberger/AcqVA_DataVisR_WS/introviz.Rmd).  If you want to render the R Notebook on your machine, i.e. knitting the document to html or a pdf, you need to make sure that you have R and RStudio installed and you also need to download the [**bibliography file**](https://github.com/MartinSchweinberger/AcqVA_DataVisR_WS/bibliography.bib) and store it in the same folder where you store the Rproj file. <br><br>
+**[Here](https://colab.research.google.com/drive/1Ty2jK_JZo9hANAWXg-d_PRV8dKVx4P51?usp=sharing)** is a **link to an interactive version of this tutorial on Google Colab**. The interactive tutorial is based on a Jupyter notebook of this tutorial. This interactive Jupyter notebook allows you to execute code yourself and - if you copy the Jupyter notebook - you can also change and edit the notebook, e.g. you can change code and upload your own data.<br></p>
 <p style='margin-left:1em;'>
 </p></span>
 </div>
 
 <br>
+
+
+
+## What to do before the workshop{-}
+
+To get the most out of this workshop, you will need to have some (basic) R skills and (basic) knowledge of how to work with R, RStudio, R Projects, and R Notebooks. If you have no or little experience with this or if you need to refresh your skills, please carefully read (or optimally go through) these tutorials:
+
+* [Getting started with R](https://slcladal.github.io/intror.html)
+
+* [Handling tables in R](https://slcladal.github.io/table.html)
+
+Before attending the workshop, you need to install the following packages in RStudio:
+
+* `here` (for easy pathing)
+
+* `tidyverse` (for data processing)
+
+* `pwr` (for simple power analyses)
+
+* `simr` (for power analyses for glmms)
+
+* `knitr` (for knitting R Notebooks)
+
+* `markdown` (for rendering Rmd files)
+
+* `rmarkdown`  (for R Markdown formatting)
+
+* `installr` (for updating R)
+
+
+You can update R and install these packages by clicking on `packages` on the top of the lower right pane in RStudio or you can execute the following code in the lower left, `Console` pane of RStudio. 
+
+```{r install, eval = F, message=F, warning=F}
+# update R
+#install.packages("installr")
+#library(installr)
+#updateR()
+# install required packages
+install.packages(c("tidyverse", "here",  "pwr", "lme4", "sjPlot", "simr"), 
+                 dependencies = T)
+```
+
+
+**It is really important that you have knowledge of R and RStudio and that you have installed the packages before the workshop so that we do not have to deal with technical issues too much.**
+
+You can find a more detailed version of the content of this workshop in these two LADAL tutorials
+
+* [Power Analysis with R](https://slcladal.github.io/pwr.html)
+
+You can follow this workshop in different ways - you can sit back and watch it like a lecture or take a more active role - that said, the intention for this workshop is clearly to be practical so that I show something and then you do it on you computer and we have exercises where you can try out what you have just learned.
+
+So, in essence, there are the following three options for following this workshop:
+
+1. You can sit back and enjoy and focus on what you see and then go back home and try it by yourself later.
+
+2. You can follow this workshop in RStudio and execute code, see what it does, understand it, and adapt it. This requires some skills in R and RStudio - although I have trued to keep things simple.
+
+3. You can click on [this link]() which takes you to a Jupyter Notebook on Google Colab (and you are then ready to go - you only  have to install the packages which takes a couple of minutes). You can then copy that Notebook and save it in your own Google Drive and then execute code, modify it, and understand it. This does require less skills and will be easier for people who just want to focus on the code that produces certain visualizations without doing it in RStudio. Also, this get rid of most technical issues (hopefully) but the installation of packages will take a while and you will need to re-install the packages every time you want to re-use the Jupyter Notebook.
+
+Choose which option suits you best and then go with it. 
+
+## Timeline{-}
+
+Here is what we have planned to cover in this workshop:
+
+Tuesday, January 25, 10-12am
+
+* Introduction
+
+* Primer
+
+* Session preparation
+
+* How to load different data formats into R
+
+* Basics of data preparation 
+
+* Getting started with pwr
+
+* Getting started with simr
+
+Tuesday, January 25, 1-3pm
+
+* Simulating data
+
+* Simulating models
+
+* Application of power analyses for mixed-effect models 
+
+* Wrap-up and Resources
+
+
+
+# Getting started{-}
+
+If you choose option 2, you need to set up our R session and prepare our R project at the very beginning of the workshop. 
+
+For everything to work, please do the following:
+
+* Create a folder for this workshop somewhere on your computer, e.g. called *AcqVA_DataVisR_WS*
+
+* In that folder, create two subfolders called *data* and *images*
+
+* Open RStudio, go to File > New Project > Existing Directory (Browse to project folder) > Create (and hit Enter)
+
+This will then create an R Project in the project folder.
+
+
+## Primer{-}
+
+We start by creating a very simple graph in base R just to get you going and showing you that creating graphs can be very easy.
+
+So for your first graph, we will create some data and then visualize it - we do this in the following code chunk.
+
+To execute the code, simply click on the *Play* button in the top right corner of the code box.
+
+```{r primer1, message=FALSE, warning=FALSE}
+# generate two variables (x and y)
+x <- sample(seq(0, 1, 0.01), 100) # draw a sample of 100 from numbers between 0 and 1
+y <- rep(c("Group A", "Group B"), each = 50) # create a vector of 100 representing 2 groups
+# create a box plot
+boxplot(x ~ y)           
+```
+
+Yay! You created a nice boxplot in R. As you can see, generating graphs in R can be super simple.
+
+But the boxplot does not really look nice and fancy, does it? Well, have a look at the next code chunk, think about what it does and then execute it by clicking on *play*.
+
+```{r primer2, message=FALSE, warning=FALSE}
+# create a nicer box plot
+boxplot(x ~ y, 
+        col = c("orange", "lightblue"), # define colors of boxes
+        xlab = "Groups",                # define x-axis label
+        ylab = "Probability")           # define y-axis label
+```
+
+
+
+
+And you can use base R to create graphs! In this tutorial, I want to show you how to generate graphs that are prettier but the code is also a bit more complex. Bute before we get to that, let's briefly talk about the data we will be using.
+
+## Today's Data{-}
+
+
+We will use 3 data sets, two data sets that Yulia provided and one that was send in by Isabel. The publications associated with the data are:
+
+The Accent data (already published): 
+
+Kupisch, Tanja, Nadine Kolb, Yulia Rodina, and Olga Urek. 2021. Foreign Accent in Pre- and Primary School Heritage Bilinguals. *Languages* 6(2), 96; https://doi.org/10.3390/languages6020096
+
+And the L2 English intervention data (which is still in progress):
+
+Nygaard, Maren, Chistopher Loe Olsen, and Yulia Rodina. In progress. The effect of form-focused intervention on subject-verb agreement in L1 Norwegian L2 English learners.
+
+In addition, we will use a data set that is part of the `likert` package and a data set that Isabel provided for the mixed-model effects visualization.
+
+Here are summaries of the data sets:
+
+1. **`data_german`** (we will call this data ``myxlsx`): contains 777 observations of the following 8 variables:
+  + ID_rater: 21 levels
+  + ID_child: 37 levels
+  + age_group: 2 levels, namely *preschool*, *school* and missing (NA, n = 21, 2.70%)
+  + accent_response: 3 levels, namely *no* (no accent), *s* (strong accent), *w* (weak accent) and missing (NA, n = 22, 2.83%)
+  + accent_numeric: n = 777, Mean = 0.81, SD = 0.77 (0 = no accent, 1 = weak accent, 2 = strong accent)
+  + rating_language: 1 level, namely DE (n = 777)
+  + age_months: n = 777, Mean = 80.19, SD = 19.99
+  + family: 3 levels, namely *bil-mixed* (bilingual - no dominance), *bil-rus* (bilingual  - Russian dominant), and *mono-de* (monolingual German)
+
+2. **`L2EnglishIntervention`** (we will call this data `exdata`): contains 3072 observations of the following 14 variables:
+  + ...1: n = 3072 (Mean = 1536.50, SD = 886.95)
+  + Test-item: n = 3072 (Mean = 24.50, SD = 13.86)
+  + ID: 32 levels
+  + Age: n = 3072 (Mean = 16.00, SD = 0.00)
+  + L1: 1 level, namely *Norwegian* (n = 3072)
+  + L2: 1 level, namely *English* (n = 3072)
+  + Proficiency-max39: n = 3072 (Mean = 31.52, SD = 4.58)
+  + Group: 2 levels, namely Kontroll (n = 1536, 50.00%) and Test (n = 1536, 50.00%)
+  + Test: 2 levels, namely Post-test (n = 1536, 50.00%) and Pre-test (n = 1536, 50.00%)
+  + Response: 2 levels, namely Feil (n = 1370, 44.60%) and Riktig (n = 1702, 55.40%)
+  + Respose-code: n = 3072 (Mean = 0.76, SD = 0.43)
+  + Grammaticality: 2 levels, namely *Grammatical* (n = 1536) and *Ungrammatical* (n = 1536)
+  + Condition: 5 levels, namely *AGR_LOC_PL* (n = 512), *AGR_LOC_SG* (n = 512), *AGR_LONG_PL* (n = 512), *AGR_LONG_SG* (n = 512) and *FILLER* (n = 1024)
+  + Sentence: 48 levels
+
+3. **`AJT_V2`** (we will call this data `regdata`: contains 2103 observations of the following 14 variables:
+  + ID: n = 2103 (0% missing)
+  + Version: n = 2103 (Mean = 11.53, SD = 5.44)
+  + Task.Name: 1 level, namely *AJT*
+  + Response: 2 levels, namely Bad (n = 841, 39.99%) and Good (n = 1262, 60.01%)
+  + Response_num: n = 2103 (Mean = 0.60, SD = 0.49)
+  + Sentence: 24 levels
+  + Group: 2 levels, namely *English* (n = 1193) and *Norwegian-English* (n = 910)
+  + Word_order: 2 levels, namely *V2* (n = 1054) and *V3* (n = 1049)
+  + Num: n = 2103 (Mean = 8.41, SD = 5.2)
+  + Sentence_type: 2 levels, namely *Non-subject-initial* (n = 1053) and *Sentence adverbials* (n = 1050)
+  + Gender: 2 levels, namely *Female* (n = 1601) and *Male* (n = 502)
+  + Age: n = 2103 (Mean = 32.43, SD = 12.07)
+  + Acc: n = 2103 (Mean = 0.23, SD = 0.42)
+  + Condition: 4 levels, namely *AdverbV2* (n = 528), *AdverbV3* (n = 525), *TopV2* (n = 526) and *TopV3* (n = 524)
+
 
 The basis for the present tutorial is @green2016simr (which you can find [here](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12504)). @green2016simr is a highly recommendable and thorough tutorial on performing power analysis in R. Recommendable literature on this topic are, e.g. @arnold2011simulation and @johnson2015power and [this tutorial](https://www.journalofcognition.org/articles/10.5334/joc.10/). 
 
@@ -367,18 +570,23 @@ plot(pc4)
 
 The results show that we would have a sufficient data set if we had 14 observations per Subject in each Item because with 10 observations, the accuracy breaches the 80 percent level.
 
+
+# Wrap-up{-}
+
+That's all folks!
+
 # Citation & Session Info {-}
 
-Schweinberger, Martin. `r format(Sys.time(), '%Y')`. *Power Analysis in R*. Brisbane: The University of Queensland. url: https://slcladal.github.io/pwr.html (Version `r format(Sys.time(), '%Y.%m.%d')`).
+Schweinberger, Martin. `r format(Sys.time(), '%Y')`. *Introduction to Data Visualization with R - AcqVA Aurora workshop*. Tromsø: The Arctic University of Norway, Tromsø. url: https://slcladal.github.io/introviz.html  (Version `r format(Sys.time(), '%Y.%m.%d')`).
 
 ```
-@manual{schweinberger`r format(Sys.time(), '%Y')`pwr,
+@manual{schweinberger`r format(Sys.time(), '%Y')`acqvavizrws,
   author = {Schweinberger, Martin},
-  title = {Power Analysis in R},
-  note = {https://slcladal.github.io/pwr.html},
+  title = {Introduction to Data Visualization with R - AcqVA Aurora workshop},
+  note = {https://slcladal.github.io/introviz.html},
   year = {`r format(Sys.time(), '%Y')`},
-  organization = "The University of Queensland, Australia. School of Languages and Cultures},
-  address = {Brisbane},
+  organization = "The Arctic University of Norway (UiT), AcqVA Aurora Center},
+  address = {Tromsø},
   edition = {`r format(Sys.time(), '%Y.%m.%d')`}
 }
 ```
@@ -388,13 +596,13 @@ Schweinberger, Martin. `r format(Sys.time(), '%Y')`. *Power Analysis in R*. Bris
 sessionInfo()
 ```
 
-
 ***
 
 [Back to top](#introduction)
 
-[Back to HOME](https://slcladal.github.io/index.html)
 
 ***
 
 # References {-}
+
+
