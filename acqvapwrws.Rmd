@@ -261,7 +261,7 @@ ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
   coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
   ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
   labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       weak effect in population (mean = 97.5; 102.5, sd = 10, d = .5)",
+       medium effect in population (mean = 97.5; 102.5, sd = 10, d = .5)",
        x = "", y = "Probability")
 ```
 
@@ -294,7 +294,7 @@ ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
   coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
   ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
   labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       weak effect in population (mean = 96; 104, sd = 10, d = .8)",
+       strong effect in population (mean = 96; 104, sd = 10, d = .8)",
        x = "", y = "Probability")
 ```
 
@@ -328,7 +328,7 @@ ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
   coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
   ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
   labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       weak effect in population (mean = 94; 106, sd = 10, d = 1.2)",
+       very strong effect in population (mean = 94; 106, sd = 10, d = 1.2)",
        x = "", y = "Probability")
 ```
 
@@ -477,6 +477,21 @@ ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
 
 **If the sample and effect size remain constant, effects are easier to detect with decreasing variability!**
 
+**In summary**, there are three main factors that determine if a model finds an effect. The accuracy (i.e., the probability of finding an effect):
+
+* the size of the effect (bigger effects are easier to detect)
+* the variability of the effect (less variability makes it easier to detect an effect), and 
+* the sample size (the bigger the sample size, the easier it is to detect an effect); 
+  + number of subjects/participants
+  + number of items/questions
+  + number of observations per item within subjects/participants
+  
+Now, if a) we dealing with a very big effect, then we need only few participants and few items to accurately find this effect.
+
+Or b) if we dealing with an effect that has low variability (it is observable for all subjects with the same strength), then we need only few participants and few items to accurately find this effect.
+
+
+
 <div class="warning" style='padding:0.1em; background-color:#f2f2f2; color:#51247a'>
 <span>
 <p style='margin-top:1em; text-align:center'>
@@ -522,6 +537,86 @@ Here are summaries of the data sets:
 
 # Basic Power Analysis{-}
 
+Let's start with a simple power analysis to see how power analyses work for simpler or basic statistical tests such as t-test, $\chi$^2^-test, or linear regression.
+
+The `pwr` package [@pwr] implements power analysis as outlined by @cohen1988statistical and  allows to perform power analyses for the following tests (selection):
+
+* balanced one way ANOVA (`pwr.anova.test`) 
+
+* chi-square test (`pwr.chisq.test`)
+
+* Correlation (`pwr.r.test`)
+
+* general linear model (`pwr.f2.test`)
+ 	
+* paired (one and two sample) t-test (`pwr.t.test`)
+
+* two sample t-test with unequal N (`pwr.t2n.test`)
+
+For each of these functions, you enter three of the four parameters (effect size, sample size, significance level, power) and the fourth is calculated. 
+
+So how does this work? Have a look at the code chunk below.
+
+Let check how to calculate the necessary sample size for each group for a one-way ANOVA that compares 5 groups and that has a power of 0.80 (80 percent), when the effect size is moderate (*f* = 0.25) and the significance level is 0.05 (5 percent)..
+
+```{r bp01, warning=F, message=F}
+# load package
+library(pwr)
+# calculate minimal sample size
+pwr.anova.test(k=5,            # 5 groups are compared
+               f=.25,          # moderate effect size
+               sig.level=.05,  # alpha/sig. level = .05
+               power=.8)       # confint./power = .8
+```
+
+In this case, the minimum number of participants in each group would be 40.
+
+Let's check how we could calculate the power if we had already collected data (with 30 participants in each group) and we want to report the power of our analysis (and et us assume that the effect sie was medium).
+
+```{r bp02, warning=F, message=F}
+# calculate minimal sample size
+pwr.anova.test(k=5,            # 5 groups are compared
+               f=.25,          # moderate effect size
+               sig.level=.05,  # alpha/sig. level = .05
+               n=30)           # n of participants
+```
+
+In this case our analysis would only have a power or 66.8 percent. This means that we would only detect a medium sized effect in 66.7 percent of cases (which is considered insufficient).
+
+## Exercise{-}
+
+Given what you have learned above, what are the minimum number of participants per group to detect medium sized effects with an 80 percent accuracy for the following tests:
+
+* general linear model
+
+```{r ex1, eval = F}
+# general linear model
+pwr.f2.test()
+```
+
+* paired t-test
+
+```{r ex2, eval = F}
+# general linear model
+pwr.t.test()
+```
+
+* 2 sample t-test
+
+```{r ex3, eval = F}
+# general linear model
+pwr.t2n.test()
+```
+
+* $\chi$^2^-test
+
+```{r ex4, eval = F}
+# general linear model
+pwr.chisq.test()
+```
+
+
+# Advanced Power Analysis{-}
 
 The basis for the present tutorial is @green2016simr (which you can find [here](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12504)). @green2016simr is a highly recommendable and thorough tutorial on performing power analysis in R. Recommendable literature on this topic are, e.g. @arnold2011simulation and @johnson2015power and [this tutorial](https://www.journalofcognition.org/articles/10.5334/joc.10/). 
 
@@ -534,23 +629,6 @@ The basis for the present tutorial is @green2016simr (which you can find [here](
 </div>
 
 <br>
-
-
-
-## What determines if you find an effect?{-}
-
-There are different factors that determine if a model finds an effect. The accuracy (i.e., the probability of finding an effect) depends on three main factors:
-
-* the size of the effect (bigger effects are easier to detect)
-* the variability of the effect (less variability makes it easier to detect an effect), and 
-* the sample size (the bigger the sample size, the easier it is to detect an effect); 
-  + number of subjects/participants
-  + number of items/questions
-  + number of observations per item within subjects/participants
-  
-Now, if a) we dealing with a very big effect, then we need only few participants and few items to accurately find this effect.
-
-Or b) if we dealing with an effect that has low variability (it is observable for all subjects with the same strength), then we need only few participants and few items to accurately find this effect.
 
 Before we conduct a study, we should figure out, what sample we need to detect a small/medium effect with medium variability so that our model is sufficient to detect this kind of effect. In order to do this, we would generate a data set that mirrors the kind of data that we expect to get (with the properties that we expect to get). We can then fit a model to this data and check if a model would be able to detect the expected effect. However, because a single model does not tell us that much (ift could simply be luck that it happened to find the effect), we run many different models on variations of the data and see how many of them find the effect. As a general rule of thumb, we want a data set that allows a model to find a medium sized effect with at least an accuracy of 80 percent [@field2007making].
 
@@ -645,6 +723,7 @@ The data looks like this.
 DT::datatable(simdat, rownames = FALSE, filter="none", caption = "Overview of the data set.", 
               options = list(pageLength = 10, scrollX=T))
 ```
+
 
 
 # Post-Hoc Power Analysis
@@ -862,37 +941,29 @@ The results show that we would have a sufficient data set if we had 14 observati
 
 If you want to know more, please have a look/go at the following resources:
 
-* 
+* [Power Analysis in R](https://slcladal.github.io/pwr.html)
+
+* [SIMR: an R package for power analysis of generalized linear mixed models by simulation](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12504)
+
+* [Power analysis in Statistics with R](https://www.r-bloggers.com/2021/05/power-analysis-in-statistics-with-r/)
+
+* [Power Analysis with simr](https://humburg.github.io/Power-Analysis/simr_power_analysis.html)
+
+* [Parallelizing simr::powercurve() in R](https://www.r-bloggers.com/2021/07/parallelizing-simrpowercurve-in-r/)
 
 That's all folks!
 
 # Citation & Session Info {-}
 
-Schweinberger, Martin. `r format(Sys.time(), '%Y')`. *Introduction to Data Visualization with R - AcqVA Aurora workshop*. Tromsø: The Arctic University of Norway, Tromsø. url: https://slcladal.github.io/introviz.html  (Version `r format(Sys.time(), '%Y.%m.%d')`).
+Schweinberger, Martin. `r format(Sys.time(), '%Y')`. *Introduction to Power Analysis with R - AcqVA Aurora workshop*. Tromsø: The Arctic University of Norway, Tromsø. url: https://github.com/MartinSchweinberger/AcqVA_PowerR_WS/acqvapwrws.html.
 
-```
-@manual{schweinberger`r format(Sys.time(), '%Y')`acqvavizrws,
-  author = {Schweinberger, Martin},
-  title = {Introduction to Data Visualization with R - AcqVA Aurora workshop},
-  note = {https://slcladal.github.io/introviz.html},
-  year = {`r format(Sys.time(), '%Y')`},
-  organization = "The Arctic University of Norway (UiT), AcqVA Aurora Center},
-  address = {Tromsø},
-  edition = {`r format(Sys.time(), '%Y.%m.%d')`}
-}
-```
 
 
 ```{r fin}
 sessionInfo()
 ```
 
-***
 
-[Back to top](#introduction)
-
-
-***
 
 # References {-}
 
