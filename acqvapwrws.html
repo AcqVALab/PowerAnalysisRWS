@@ -956,7 +956,7 @@ sim_gst</code></pre>
 ## Based on 100 simulations, (0 warnings, 0 errors)
 ## alpha = 0.05, nrow = 480
 ## 
-## Time elapsed: 0 h 0 m 9 s</code></pre>
+## Time elapsed: 0 h 0 m 10 s</code></pre>
 <p><strong>The data is not sufficient to detect a weak effect of <code>Group * SentenceType</code> with 30 percent accuracy</strong></p>
 <hr />
 <div class="warning" style="padding:0.1em; background-color:#f2f2f2; color:#51247a">
@@ -1017,7 +1017,7 @@ sim_m1_as_gst</code></pre>
 ## Based on 20 simulations, (0 warnings, 0 errors)
 ## alpha = 0.05, nrow = 1000
 ## 
-## Time elapsed: 0 h 0 m 1 s</code></pre>
+## Time elapsed: 0 h 0 m 2 s</code></pre>
 <p>Plot power curve</p>
 <pre class="r"><code>pcurve_m1_as_gst &lt;- simr::powerCurve(m1_as, 
                                test=fcompare(y ~ Group * SentenceType), 
@@ -1198,7 +1198,7 @@ sim_m2_wo</code></pre>
 ## Based on 10 simulations, (0 warnings, 0 errors)
 ## alpha = 0.05, nrow = 480
 ## 
-## Time elapsed: 0 h 0 m 0 s</code></pre>
+## Time elapsed: 0 h 0 m 1 s</code></pre>
 <p>An alternative way to perform the simulation</p>
 <pre class="r"><code># set seed for replicability
 set.seed(12345)
@@ -1268,7 +1268,31 @@ head(simdat, 15)</code></pre>
 ## 13    Sub1      Test    3
 ## 14    Sub1      Test    4
 ## 15    Sub1      Test    5</code></pre>
-<p>We add a dependent variable (AOI) which represents the dependent variable in the study. In our case, we determine that Condition has a relatively weak effect (the probability of gazing into the area of interest (AOI) is .7 in the test condition compared to .5 in the control condition). In addition, this effect is only present in half of the subjects to reflect the variability in the effect.</p>
+<p><strong>EXERCISE</strong></p>
+<p>Can you create a data set with 5 Subjects, 5 Items (each) for 4 Conditions?</p>
+<p><strong>Solution</strong></p>
+<p>The first 20 rows of the data should look like shown below:</p>
+<pre><code>##    Subjects Items  Condition
+## 1  Subject1 Item1 Condition1
+## 2  Subject1 Item2 Condition1
+## 3  Subject1 Item3 Condition1
+## 4  Subject1 Item4 Condition1
+## 5  Subject1 Item5 Condition1
+## 6  Subject1 Item1 Condition2
+## 7  Subject1 Item2 Condition2
+## 8  Subject1 Item3 Condition2
+## 9  Subject1 Item4 Condition2
+## 10 Subject1 Item5 Condition2
+## 11 Subject1 Item1 Condition3
+## 12 Subject1 Item2 Condition3
+## 13 Subject1 Item3 Condition3
+## 14 Subject1 Item4 Condition3
+## 15 Subject1 Item5 Condition3
+## 16 Subject1 Item1 Condition4
+## 17 Subject1 Item2 Condition4
+## 18 Subject1 Item3 Condition4
+## 19 Subject1 Item4 Condition4
+## 20 Subject1 Item5 Condition4</code></pre>
 <div id="generating-the-model-1" class="section level3 unnumbered">
 <h3>Generating the model</h3>
 <p>Set effects and specify model parameters</p>
@@ -1424,7 +1448,7 @@ rsim_m4_c</code></pre>
 ## Based on 20 simulations, (0 warnings, 0 errors)
 ## alpha = 0.05, nrow = 200
 ## 
-## Time elapsed: 0 h 0 m 4 s</code></pre>
+## Time elapsed: 0 h 0 m 3 s</code></pre>
 </div>
 </div>
 <div id="extending-the-data" class="section level2 unnumbered">

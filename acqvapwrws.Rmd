@@ -883,7 +883,31 @@ head(simdat, 15)
 ```
 
 
-We add a dependent variable (AOI) which represents the dependent variable in the study. In our case, we determine that Condition has a relatively weak effect (the probability of gazing into the area of interest (AOI) is .7 in the test condition compared to .5 in the control condition). In addition, this effect is only present in half of the subjects to reflect the variability in the effect. 
+**EXERCISE**
+
+Can you create a data set with 5 Subjects, 5 Items (each) for 4 Conditions?
+
+```{r datex1, eval = F}
+
+```
+
+**Solution**
+
+The first 20 rows of the data should look like shown below:
+
+```{r datex2, echo = F}
+# generate data
+Items <- rep(rep(paste0("Item", 1:5), 4), 5)
+Condition <- rep(rep(paste0("Condition", 1:4), each = 5), 5)
+Subjects <- rep(paste0("Subject", 1:5), each = 20)
+# combine into data frame
+exdat <- data.frame(Subjects, Items, Condition)
+# inspect
+head(exdat, 20)
+```
+
+
+
 
 ### Generating the model{-}
 
