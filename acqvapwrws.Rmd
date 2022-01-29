@@ -167,43 +167,44 @@ And let's start with varying effect size.
 
 ```{r same, echo = F, warning=F, message=F}
 distplot <- function(mean1, mean2, sd1, n, pop = "two different populations", d = 0, effect = "no", ylim = 0.06, seed = 123){
-options(scipen = 999)
-library(tidyverse)
-library(DescTools)
-set.seed(seed)
-data.frame(time = c(rnorm(n, mean1, sd1), rnorm(n, mean2, sd1))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", n), rep("English", n))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.05, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(60, 140), ylim = c(0, ylim)) +
-  ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = paste0("2 groups (N = ", n, " sampled from ", pop, " (with means and CIs)\n", effect, " effect (mean(s): ", mean1, "; ", mean2, ", sd: ", sd1, ", Cohen's d: ", d, ")!"),
-       x = "", y = "Probability")
+  options(scipen = 999)
+  require(tidyverse)
+  require(DescTools)
+  set.seed(seed)
+  data.frame(time = c(rnorm(n, mean1, sd1), rnorm(n, mean2, sd1))) %>%
+    dplyr::mutate(group = c(rep("Norwegian", n), rep("English", n))) %>%
+    dplyr::mutate(group = factor(group)) %>%
+    group_by(group) %>%
+    mutate(mean = mean(time),
+           cil = DescTools::MeanCI(time, conf.level=0.95)[2],
+           ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
+    ungroup() %>%
+    mutate(t = t.test(time ~ group, conf.level=0.95)[1],
+           df = t.test(time ~ group, conf.level=0.95)[2],
+           p = t.test(time ~ group, conf.level=0.95)[3]) %>%
+    rowwise() %>%
+    mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
+    select(-t, -df, -p)  -> pdat
+  ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
+    geom_density(aes(alpha = .9)) +
+    theme(legend.position = "none") +
+    geom_point(aes(x = mean, y = 0.05, group= group)) +  
+    geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
+    theme_bw() +
+    theme(legend.position = "none") +
+    coord_cartesian(xlim = c(60, 140), ylim = c(0, ylim)) +
+    ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
+    labs(title = paste0("2 groups (N = ", n, " sampled from ", pop, " (with means and CIs)\n", effect, " effect (mean(s): ", mean1, "; ", mean2, ", sd: ", sd1, ", Cohen's d: ", d, ")!"),
+         x = "", y = "Probability")
 }
 ```
 
-```{r displot1, echo = F}
+```{r displot1, echo = F, warning=F, message=F}
 distplot(mean1 = 100, mean2 = 100, sd1 = 10, n = 30, pop = "the same population")
 ```
 
-![2 groups from 1 distribution](https://github.com/MartinSchweinberger/AcqVAPowerRWS/images/dist01.png)
+![2 groups from 1 distribution](https://raw.githubusercontent.com/MartinSchweinberger/AcqVAPowerRWS/main/images/dist01.png)
+
 
 Now, lets have a look at at the distribution of two different groups (group has a weak effect, Cohen's *d* = .2)
 
@@ -212,7 +213,7 @@ distplot(mean1 = 99, mean2 = 101, sd1 = 10, n = 30, d = .2, effect = "weak", see
 ```
 
 
-![2 groups from 2 distribution (weak effect)](https://github.com/MartinSchweinberger/AcqVAPowerRWS/images/dist02.png)
+![2 groups from 2 distribution (weak effect)](https://raw.githubusercontent.com/MartinSchweinberger/AcqVAPowerRWS/main/images/dist02.png)
 
 Now, lets have a look at at the distribution of two different groups (group has a medium effect, Cohen's *d* = .5)
 
@@ -299,26 +300,17 @@ What power analysis allow us to do is to calculate at what sample size we would 
 # Today's Data{-}
 
 
-We will use 3 data sets, two data sets that Yulia provided and one that was send in by Isabel. The publications associated with the data are:
+We will use 1 data set that is based on a two data set that was send in by Isabel. 
 
-The Accent data (already published): 
-
-Kupisch, Tanja, Nadine Kolb, Yulia Rodina, and Olga Urek. 2021. Foreign Accent in Pre- and Primary School Heritage Bilinguals. *Languages* 6(2), 96; https://doi.org/10.3390/languages6020096
-
-And the L2 English intervention data (which is still in progress):
-
-Nygaard, Maren, Chistopher Loe Olsen, and Yulia Rodina. In progress. The effect of form-focused intervention on subject-verb agreement in L1 Norwegian L2 English learners.
-
-In addition, we will use a data set that is part of the `likert` package and a data set that Isabel provided for the mixed-model effects visualization.
 
 Here are summaries of the data sets:
 
-1. **`AJT_V2`** (we will call this data `regdata`: contains 2103 observations of the following 14 variables:
-  + ID: n = 2103 (0% missing)
+1. **`AJT_V2`** (we will call this data `regdat`: contains 480 observations of the following 5 variables:
+  + ID: 20 levels (0% missing)
   + Sentence: 24 levels
-  + Group: 2 levels, namely *English* (n = 1193) and *NorwegianEnglish* (n = 910)
-  + WordOrder: 2 levels, namely *V2* (n = 1054) and *V3* (n = 1049)
-  + SentenceType: 2 levels, namely *NonSubjectInitial* (n = 1053) and *SentenceAdverbials* (n = 1050)
+  + Group: 2 levels, namely *English* (n = 240) and *NorwegianEnglish* (n = 240)
+  + WordOrder: 2 levels, namely *V2* (n = 240) and *V3* (n = 240)
+  + SentenceType: 2 levels, namely *NonSubjectInitial* (n = 240) and *SentenceAdverbials* (n = 240)
 
 
 # Basic Power Analysis{-}
@@ -343,7 +335,7 @@ For each of these functions, you enter three of the four parameters (effect size
 
 So how does this work? Have a look at the code chunk below.
 
-Let check how to calculate the necessary sample size for each group for a one-way ANOVA that compares 5 groups and that has a power of 0.80 (80 percent), when the effect size is moderate (*f* = 0.25) and the significance level is 0.05 (5 percent)..
+Let check how to calculate the necessary sample size for each group for a one-way ANOVA that compares 5 groups and that has a power of 0.80 (80 percent), when the effect size is moderate (*f* = 0.25) and the significance level is 0.05 (5 percent). Regarding the effect size *f*, *f* has been categorized as small = .1, medium .25, and large $≥$ 0.4 [see @cohen1988statistical].
 
 ```{r bp01, warning=F, message=F}
 # load package
@@ -357,7 +349,7 @@ pwr.anova.test(k=5,            # 5 groups are compared
 
 In this case, the minimum number of participants in each group would be 40.
 
-Let's check how we could calculate the power if we had already collected data (with 30 participants in each group) and we want to report the power of our analysis (and et us assume that the effect sie was medium).
+Let's check how we could calculate the power if we had already collected data (with 30 participants in each group) and we want to report the power of our analysis (and et us assume that the effect size was medium).
 
 ```{r bp02, warning=F, message=F}
 # calculate minimal sample size
@@ -369,52 +361,102 @@ pwr.anova.test(k=5,            # 5 groups are compared
 
 In this case our analysis would only have a power or 66.8 percent. This means that we would only detect a medium sized effect in 66.7 percent of cases (which is considered insufficient).
 
-## Exercise{-}
 
-Given what you have learned above, what are the minimum number of participants per group to detect medium sized effects with an 80 percent accuracy for the following tests:
+## Power Analysis for GLMs{-}
 
-* general linear model
+When determining the power of a generalized linear model, we need to provide
 
-```{r ex1, eval = F}
+* the degrees of freedom for numerator (´u´)
+
+* the degrees of freedom for denominator (`v`)
+
+* the effect size (the estimate of the intercept and the slope/estimates of the predictors)
+
+* the level of significance (i.e.,  the type I error probability)
+
+The values of the parameters in the example below are adapted from the fixed-effects regression example that was used to analyze different teaching styles (see [here](https://slcladal.github.io/regression.html#Example_2:_Teaching_Styles)).
+
+The effect size used here is $f^2^$ that has be categorized as follows [see @cohen1988statistical]: small $≥$ 0.02, medium $≥$ 0.15, and large $≥$ 0.35. So in order to determine if the data is sufficient to find a weak effect when comparing 2 groups with 30 participants in both groups (df_numerator_: 2-1; df_denominator_: (30-1) + (30-1)) and a significance level at $\alpha$ = .05, we can use the following code.
+
+
+```{r ex1}
 # general linear model
-pwr.f2.test()
+pwrglm <- pwr.f2.test(u = 1,
+                      v = 58,
+                      f2 = .02,
+                      sig.level = 0.05)
+# inspect results
+pwrglm
 ```
 
-* paired t-test
 
-```{r ex2, eval = F}
-# general linear model
-pwr.t.test()
+The results show that the regression analyses used to evaluate the effectiveness of different teaching styles only had a power of `r pwrglm$power`.
+
+
+## Power Analysis for t-tests{-}
+
+For t-tests (both paired and 2-sample t-tests), the effect size measure is Cohen's $d$ that has be categorized as follows [see @cohen1988statistical]: small $≥$ 0.2, medium $≥$ 0.5, and large $≥$ 0.8. 
+
+**Paired t-test**
+
+So in order to determine if the data is sufficient to find a weak effect when comparing the pre- and post-test results of a group with 30 participants, evaluating an undirected hypothesis (thus the *two-tailed* approach), and a significance level at $\alpha$ = .05, we can use the following code.
+
+```{r ex2}
+# paired t-test
+pwrpt <- pwr.t.test(d=0.2,
+                    n=30,
+                    sig.level=0.05,
+                    type="paired",
+                    alternative="two.sided")
+# inspect
+pwrpt
 ```
 
-* 2 sample t-test
 
-```{r ex3, eval = F}
-# general linear model
-pwr.t2n.test()
+Given the data, a weak effect in this design can only be detected with a certainty of `r pwrpt$power` percet. This means that we would need to substantively increase the sample size to detect a small effect with this design.
+
+**Two-sample (independent) t-test**
+
+The power in a similar scenario but with two different groups (with 25 and 35 subjects) can be determined as follows (in this case we test a directed hypothesis that checks if the intervention leads to an increase in the outcome - hence the *greater* in the `alternative` argument):
+
+```{r ex3}
+# independent t-test
+pwr2t <- pwr.t2n.test(d=0.2,
+                      n1=35,
+                      n2 = 25,
+                      sig.level=0.05,
+                      alternative="greater")
+# inspect
+pwr2t
 ```
 
-* $\chi$^2^-test
+Given the data, a weak effect in this design can only be detected with a certainty of `r pwr2t$power` percent. This means that we would need to substantively increase the sample size to detect a small effect with this design.
 
-```{r ex4, eval = F}
-# general linear model
-pwr.chisq.test()
+
+## Power Analysis for $\chi$^2^-tests{-}
+
+Let us now check the power of a $\chi^2$^-test. For $\chi^2$^-test, the effect size measure used in the power analysis is $w$ that has be categorized as follows [see @cohen1988statistical]: small $≥$ 0.1, medium $≥$ 0.3, and large $≥$ 0.5. Also, keep in mind that for $\chi^2$^-tests, at least 80 percent of cells need to have values $≥$ 5 and none of the cells should have expected values smaller than 1 [see @bortz109verteilungsfreie]. 
+
+
+
+```{r ex4}
+# x2-test
+pwrx2 <- pwr.chisq.test(w=0.2,
+                        N = 25, # total number of observations
+                        df = 1,
+                        sig.level=0.05)
+# inspect
+pwrx2
 ```
 
+
+Given the data, a weak effect in this design can only be detected with a certainty of `r pwrx2$power` percent. This means that we would need to substantively increase the sample size to detect a small effect with this design.
 
 # Advanced Power Analysis{-}
 
 The basis for the present tutorial is @green2016simr (which you can find [here](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12504)). @green2016simr is a highly recommendable and thorough tutorial on performing power analysis in R. Recommendable literature on this topic are, e.g. @arnold2011simulation and @johnson2015power and [this tutorial](https://www.journalofcognition.org/articles/10.5334/joc.10/). 
 
-<div class="warning" style='padding:0.1em; background-color:#f2f2f2; color:#51247a'>
-<span>
-<p style='margin-top:1em; text-align:center'>
-<b>NOTE</b><br>Power analysis have also been used post-hoc to test if the sample size of studies was sufficient to detect meaningful effects. However, such post-hoc power calculations where the target effect size comes from the data, give misleading results [@hoenig2001abuse; @perugini2018practical] and should thus be treated with extreme care!</p>
-<p style='margin-left:1em;'>
-</p></span>
-</div>
 
-<br>
 
 Before we conduct a study, we should figure out, what sample we need to detect a small/medium effect with medium variability so that our model is sufficient to detect this kind of effect. In order to do this, we would generate a data set that mirrors the kind of data that we expect to get (with the properties that we expect to get). We can then fit a model to this data and check if a model would be able to detect the expected effect. However, because a single model does not tell us that much (ift could simply be luck that it happened to find the effect), we run many different models on variations of the data and see how many of them find the effect. As a general rule of thumb, we want a data set that allows a model to find a medium sized effect with at least an accuracy of 80 percent [@field2007making].
 
@@ -442,14 +484,7 @@ Load data
 
 ```{r reg01, message=FALSE, warning=FALSE}
 # load data
-regdat <- readRDS(here::here("data", "sampledat.rda")) %>%
-  dplyr::mutate(Group = ifelse(Group == "Norwegian-English", "NorwegianEnglish", "English"),
-                Sentence_type = ifelse(Sentence_type == "Non-subject-initial", 
-                                       "NonSubjectInitial", "SentenceAdverbials"),
-                Sentence = stringr::str_remove_all(Sentence, "\\W")) %>%
-  dplyr::mutate_if(is.character, factor) %>%
-  dplyr::rename(WordOrder = Word_order,
-                SentenceType = Sentence_type)
+regdat <- readRDS(here::here("data", "regdat.rda"))
 # inspect
 head(regdat, 10);str(regdat)
 ```
@@ -534,7 +569,7 @@ estimatesfixedeffects <- fixef(m1)
 exp(estimatesfixedeffects)
 ```
 
-We will now check if the effect size [@chen2010big] 
+We will now check the effect size which can be interpreted according to @chen2010big [see also @cohen1988statistical].
 
 * small effect (Cohen's d 0.2, OR = 1.68)
 
@@ -887,19 +922,28 @@ plot(pcurve_m4_asi_c)
 
 # Post-Hoc Analyses{-}
 
-Adding a response variable
+We now turn to post-hoc power analyses.
+
+<div class="warning" style='padding:0.1em; background-color:#f2f2f2; color:#51247a'>
+<span>
+<p style='margin-top:1em; text-align:center'>
+<b>NOTE</b><br>Power analysis have also been used post-hoc to test if the sample size of studies was sufficient to detect meaningful effects. However, such post-hoc power calculations where the target effect size comes from the data, give misleading results [@hoenig2001abuse; @perugini2018practical] and should thus be treated with extreme care!</p>
+<p style='margin-left:1em;'>
+</p></span>
+</div>
+
+<br>
+
+We begin by adding a response variable to our data. In this case, we vary the response variable ti a higher likelihood of obtaining gazes in the *area of interests* (AOI) in the test condition.
 
 ```{r glmer20}
 simdat2 <- simdat %>%
   dplyr::arrange(Condition) %>%
   dplyr::mutate(
-  dep <- c(sample(c("AOI", "NotAOI"), 50, replace = T, prob = c(.5, .5)),
-           sample(c("AOI", "NotAOI"), 50, replace = T, prob = c(.5, .5)),
-           sample(c("AOI", "NotAOI"), 50, replace = T, prob = c(.5, .5)),
-           sample(c("AOI", "NotAOI"), 50, replace = T, prob = c(.7, .3)))
+  AOI = c(sample(c("AOI", "NotAOI"), 100, replace = T, prob = c(.5, .5)),
+           sample(c("AOI", "NotAOI"), 100, replace = T, prob = c(.7, .3)))
   ) %>%
-  dplyr::mutate_if(is.character, factor) %>%
-  dplyr::rename(AOI = 4)
+  dplyr::mutate_if(is.character, factor)
 # inspect
 head(simdat2, 20)
 ```
@@ -935,7 +979,7 @@ Now, we perform power analysis on an observed effect. This analysis tells us how
 <div class="warning" style='padding:0.1em; background-color:#f2f2f2; color:#51247a'>
 <span>
 <p style='margin-top:1em; text-align:center'>
-<b>NOTE</b><br>We use a very low number of simulations (100) and we use the default z-test which is suboptimal for small samples [@bolker2009generalized]. In a proper study, you should increase the number of simulations (to at least 1000) and you should use a bootstrapping rather than a z-test [cf. @halekoh2014kenward].</p>
+<b>NOTE</b><br>We use a very low number of simulations (10) and we use the default z-test which is suboptimal for small samples [@bolker2009generalized]. In a proper study, you should increase the number of simulations (to at least 1000) and you should use a bootstrapping rather than a z-test [cf. @halekoh2014kenward].</p>
 <p style='margin-left:1em;'>
 </p></span>
 </div>
@@ -961,6 +1005,7 @@ The results of the power analysis show that, given the data at hand, the model w
 
 # Fixing effects
 
+We will set the effects that we obtained based on our "observed" data to check if, given the size of the data, we have enough power to detect a small effect of `Condition`. In a first step, we check the observed effects.
 
 ```{r pwr9, message=F, warning=F}
 estimatesfixedeffects <- fixef(m5)
@@ -969,7 +1014,7 @@ exp(estimatesfixedeffects)
 
 
 
-We can see that the effect is rather small which makes it very hard to detect an effect. We will now change the size of the effect of ConditionTest to represent a truly small effect, i.e. on the brink of being noise but being just strong enough to be considered small. In other words, we will set the effect so that its odds ratio is exactly 1.68.
+We can see that the effect is already rather small which makes it very hard to detect an effect. We will now change the size of the effect of ConditionTest to represent a truly small effect, i.e. on the brink of being noise but being just strong enough to be considered small. In other words, we will set the effect so that its odds ratio is exactly 1.68.
 
 
 ```{r}
