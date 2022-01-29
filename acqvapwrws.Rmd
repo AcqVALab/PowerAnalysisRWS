@@ -211,6 +211,9 @@ Now, lets have a look at at the distribution of two different groups (group has 
 distplot(mean1 = 99, mean2 = 101, sd1 = 10, n = 30, d = .2, effect = "weak", seed = 111)
 ```
 
+
+![2 groups from 2 distribution (weak effect)](https://github.com/MartinSchweinberger/AcqVA_PowerR_WS/images/dist02.png)
+
 Now, lets have a look at at the distribution of two different groups (group has a medium effect, Cohen's *d* = .5)
 
 ```{r medium, echo = F, warning=F, message=F}
