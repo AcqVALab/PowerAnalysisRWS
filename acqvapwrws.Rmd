@@ -166,12 +166,13 @@ And let's start with varying effect size.
 
 
 ```{r same, echo = F, warning=F, message=F}
+distplot <- function(mean1, mean2, sd1, n, pop = "two different populations", d = 0, effect = "no", ylim = 0.06, seed = 123){
 options(scipen = 999)
 library(tidyverse)
 library(DescTools)
-set.seed(1234)
-data.frame(time = c(rnorm(30,100,10), rnorm(30,100,10))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 30), rep("English", 30))) %>%
+set.seed(seed)
+data.frame(time = c(rnorm(n, mean1, sd1), rnorm(n, mean2, sd1))) %>%
+  dplyr::mutate(group = c(rep("Norwegian", n), rep("English", n))) %>%
   dplyr::mutate(group = factor(group)) %>%
   group_by(group) %>%
   mutate(mean = mean(time),
@@ -191,140 +192,42 @@ ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
   geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
   theme_bw() +
   theme(legend.position = "none") +
-  coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
+  coord_cartesian(xlim = c(60, 140), ylim = c(0, ylim)) +
   ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 30) sampled from the same population (with means and CIs)\n
-       no effect (mean = 100, sd = 10)!",
+  labs(title = paste0("2 groups (N = ", n, " sampled from ", pop, " (with means and CIs)\n", effect, " effect (mean(s): ", mean1, "; ", mean2, ", sd: ", sd1, ", Cohen's d: ", d, ")!"),
        x = "", y = "Probability")
+}
 ```
+
+```{r displot1, echo = F}
+distplot(mean1 = 100, mean2 = 100, sd1 = 10, n = 30, pop = "the same population")
+```
+
+![2 groups from 1 distribution](https://github.com/MartinSchweinberger/AcqVA_PowerR_WS/images/dist01.png)
 
 Now, lets have a look at at the distribution of two different groups (group has a weak effect, Cohen's *d* = .2)
 
 ```{r weak, echo = F, warning=F, message=F}
-set.seed(123)
-data.frame(time = c(rnorm(30,101,10), rnorm(30,99,10))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 30), rep("English", 30))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.05, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
-  ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       weak effect in population (mean = 99; 101, sd = 10, d = .2)",
-       x = "", y = "Probability")
+distplot(mean1 = 99, mean2 = 101, sd1 = 10, n = 30, d = .2, effect = "weak", seed = 111)
 ```
 
 Now, lets have a look at at the distribution of two different groups (group has a medium effect, Cohen's *d* = .5)
 
 ```{r medium, echo = F, warning=F, message=F}
-set.seed(123)
-data.frame(time = c(rnorm(30,102.5,10), rnorm(30,97.5,10))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 30), rep("English", 30))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.05, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
-  ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       medium effect in population (mean = 97.5; 102.5, sd = 10, d = .5)",
-       x = "", y = "Probability")
+distplot(mean1 = 97.5, mean2 = 102.5, sd1 = 10, n = 30, d = 0.5, effect = "medium", seed = 222)
 ```
 
 Now, lets have a look at at the distribution of two different groups (group has a strong effect, Cohen's *d* = .8)
 
 ```{r strong, echo = F, warning=F, message=F}
-set.seed(123)
-data.frame(time = c(rnorm(30,104,10), rnorm(30,96,10))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 30), rep("English", 30))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.05, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
-  ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       strong effect in population (mean = 96; 104, sd = 10, d = .8)",
-       x = "", y = "Probability")
+distplot(mean1 = 96, mean2 = 104, sd1 = 10, n = 30, d = 0.8, effect = "strong", seed = 444, ylim = 0.08)
 ```
 
 
 Now, lets have a look at at the distribution of two different groups (group has a very strong effect, Cohen's *d* = 1.2)
 
 ```{r vstrong, echo = F, warning=F, message=F}
-set.seed(123)
-data.frame(time = c(rnorm(30,106,10), rnorm(30,94,10))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 30), rep("English", 30))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.05, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
-  ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       very strong effect in population (mean = 94; 106, sd = 10, d = 1.2)",
-       x = "", y = "Probability")
+distplot(mean1 = 94, mean2 = 106, sd1 = 10, n = 30, d = 1.2, effect = "very strong", seed = 555)
 ```
 
 **If variability and sample size remain constant, larger effects are easier to detect than smaller effects!**
@@ -335,33 +238,7 @@ And let's now look at sample size.
 
 
 ```{r n30, echo = F, warning=F, message=F}
-set.seed(1234)
-data.frame(time = c(rnorm(30,97.5,10), rnorm(30,102.5,10))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 30), rep("English", 30))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.05, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
-  ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       medium effect in population (mean = 97.5; 102.5, sd = 10, d = .5)",
-       x = "", y = "Probability")
+distplot(mean1 = 97.5, mean2 = 102.5, sd1 = 10, n = 30, d = 0.5, effect = "medium", seed = 666)
 ```
 
 
@@ -369,33 +246,7 @@ Let us now increase the sample size to N = 50.
 
 
 ```{r n50, echo = F, warning=F, message=F}
-set.seed(1234)
-data.frame(time = c(rnorm(50,97.5,10), rnorm(50,102.5,10))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 50), rep("English", 50))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.05, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(65, 135), ylim = c(0, 0.06)) +
-  ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 50) sampled from *different* population (with means and CIs):
-       medium effect in population (mean = 97.5; 102.5, sd = 10, d = .5)",
-       x = "", y = "Probability")
+distplot(mean1 = 97.5, mean2 = 102.5, sd1 = 10, n = 50, d = 0.5, effect = "medium", seed = 777)
 ```
 
 **If variability and effect size remain constant, effects are easier to detect with increasing sample size!**
@@ -406,65 +257,13 @@ And let's now look at variability.
 
 
 ```{r sd10, echo = F, warning=F, message=F}
-set.seed(1234)
-data.frame(time = c(rnorm(30, 97.5, 10), rnorm(30, 102.5, 10))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 30), rep("English", 30))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.05, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.05, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(50, 150), ylim = c(0, 0.06)) +
-  ggplot2::annotate("text", x = 120, y = 0.05, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       medium effect in population (mean = 97.5; 102.5, sd = 10, d = .5)",
-       x = "", y = "Probability")
+distplot(mean1 = 97.5, mean2 = 102.5, sd1 = 10, n = 30, d = 0.5, effect = "medium", seed = 888)
 ```
 
 Let's decrease the variability to sd = 5.
 
 ```{r sd5, echo = F, warning=F, message=F}
-set.seed(1234)
-data.frame(time = c(rnorm(30, 97.5, 5), rnorm(30, 102.5, 5))) %>%
-  dplyr::mutate(group = c(rep("Norwegian", 30), rep("English", 30))) %>%
-  dplyr::mutate(group = factor(group)) %>%
-  group_by(group) %>%
-  mutate(mean = mean(time),
-         cil = DescTools::MeanCI(time, conf.level=0.95)[2],
-         ciu = DescTools::MeanCI(time, conf.level=0.95)[3]) %>%
-  ungroup() %>%
-  mutate(t = t.test(time ~ group, conf.level=0.95)[1],
-         df = t.test(time ~ group, conf.level=0.95)[2],
-         p = t.test(time ~ group, conf.level=0.95)[3]) %>%
-  rowwise() %>%
-  mutate(ttest = paste0("t: ", round(t, 2), ", df: ", round(df, 1), ", p-value: ", round(p, 4))) %>%
-  select(-t, -df, -p)  -> pdat
-ggplot(pdat, aes(x = time, group = group, color = group, linetype = group)) +
-  geom_density(aes(alpha = .9)) +
-  theme(legend.position = "none") +
-  geom_point(aes(x = mean, y = 0.125, group= group)) +  
-  geom_errorbarh(aes(xmin = cil, xmax = ciu, y = 0.125, height = .005)) +
-  theme_bw() +
-  theme(legend.position = "none") +
-  coord_cartesian(xlim = c(50, 150), ylim = c(0, 0.15)) +
-  ggplot2::annotate("text", x = 120, y = 0.125, label = unique(pdat$ttest)) +
-  labs(title = "2 groups (N = 30) sampled from *different* population (with means and CIs):
-       medium effect in population (mean = 97.5; 102.5, sd = 5, d = .5)",
-       x = "", y = "Probability")
+distplot(mean1 = 97.5, mean2 = 102.5, sd1 = 5, n = 30, d = 0.5, effect = "medium", ylim = 0.125, seed = 999)
 ```
 
 **If the sample and effect size remain constant, effects are easier to detect with decreasing variability!**
