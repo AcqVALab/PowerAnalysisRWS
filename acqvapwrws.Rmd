@@ -328,7 +328,7 @@ When determining the power of a generalized linear model, we need to provide
 
 The values of the parameters in the example below are adapted from the fixed-effects regression example that was used to analyze different teaching styles (see [here](https://slcladal.github.io/regression.html#Example_2:_Teaching_Styles)).
 
-The effect size used here is $f^2^$ that has be categorized as follows [see @cohen1988statistical]: small $≥$ 0.02, medium $≥$ 0.15, and large $≥$ 0.35. So in order to determine if the data is sufficient to find a weak effect when comparing 2 groups with 30 participants in both groups (df_numerator_: 2-1; df_denominator_: (30-1) + (30-1)) and a significance level at $\alpha$ = .05, we can use the following code.
+The effect size used here is $f^2$ that has be categorized as follows [see @cohen1988statistical]: small $≥$ 0.02, medium $≥$ 0.15, and large $≥$ 0.35. So in order to determine if the data is sufficient to find a weak effect when comparing 2 groups with 30 participants in both groups (df_numerator_: 2-1; df_denominator_: (30-1) + (30-1)) and a significance level at $\alpha$ = .05, we can use the following code.
 
 
 ```{r pwrglm}
@@ -443,7 +443,7 @@ In the following, we will go through how to determine what sample size we need f
 
 As we we have installed the packages, we can activate them as shown below.
 
-```{r prep2, message=FALSE} 
+```{r prep2, message=F, warning=F} 
 # load packages
 library(tidyverse)
 library(lme4)
@@ -488,7 +488,7 @@ Set effects and specify model parameters
 
 * variance
 
-```{r reg03}
+```{r reg03, message=F, warning=F}
 # Intercept + slopes for fixed effects 
 # (Group, Sentence_type, Word_order, and an interaction between Group * Sentence_type)
 fixed <- c(.52, .52, .52, .52, .52)
@@ -501,7 +501,7 @@ res <- 2
 
 Generate model
 
-```{r reg04}
+```{r reg04, message=F, warning=F}
 #model <- makeLmer(y ~ (1|Sentence) + (1|ID) + Group * Sentence_type + Word_order, fixef=fixed, VarCorr=rand, sigma=res, data=regdat)
 m1 <- makeLmer(y ~ (1|Sentence) + Group * SentenceType + WordOrder, 
                fixef=fixed, 
@@ -524,7 +524,7 @@ sjPlot::tab_model(m1)
 
 Let us now check if the data is sufficient to detect the interaction between `Group` and `Sentence_type`.
 
-```{r reg06}
+```{r reg06, message=F, warning=F}
 sim_wo <- simr::powerSim(m1, 
                         nsim=10,
                         test = fcompare(y ~ WordOrder))
@@ -557,7 +557,7 @@ We will now check the effect size which can be interpreted according to @chen201
 
 Power Analysis: let's check if the data set has enough power to detect a weak effect for `Group * SentenceType`.
 
-```{r reg10}
+```{r reg10, message=F, warning=F}
 sim_gst <- simr::powerSim(m1, 
                           nsim=100, 
                           test = fcompare(y ~ Group * SentenceType))
