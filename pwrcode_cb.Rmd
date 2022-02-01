@@ -2,20 +2,19 @@
 ![Introduction to Power Analysis with R - AcqVA Aurora workshop](https://slcladal.github.io/images/acqvalab.png)
 
 
-# Introduction{-}
+# Introduction
 
-This tutorial introduces power analysis for determining sample size using R with the aim of informing about the theoretical underpinnings, showcasing how to perform power analysis, and enabling participants on how to adapt, change, and modify data sets so that they can be fed into a power analysis using the `simr` [@simr]. 
+This tutorial introduces power analysis for determining sample size using R with the aim of informing about the theoretical underpinnings, showcasing how to perform power analysis, and enabling participants on how to adapt, change, and modify data sets so that they can be fed into a power analysis using the `simr` (Green and MacLeod 2016a). 
 
 
 
-This tutorial is aimed at intermediate users of R. The aim is not to provide a fully-fledged guide but rather to show and exemplify how to perform a power analysis for a generalized linear mixed-effects modelas this is the most common type of analysis for experimental studies.
+This tutorial is aimed at intermediate users of R. The aim is not to provide a fully-fledged guide but rather to show and exemplify how to perform a power analysis for a generalized linear mixed-effects model as this is the most common type of analysis for experimental studies.
 
 
 <div class="warning" style='padding:0.1em; background-color:#f2f2f2; color:#51247a'>
 <span>
 <p style='margin-top:1em; text-align:center'>
-The entire R Notebook for the tutorial can be downloaded [**here**](https://github.com/MartinSchweinberger/AcqVA_PowerR_WS/acqvapwrws.Rmd).  If you want to render the R Notebook on your machine, i.e. knitting the document to html or a pdf, you need to make sure that you have R and RStudio installed and you also need to download the [**bibliography file**](https://github.com/MartinSchweinberger/AcqVA_DataVisR_WS/bibliography.bib) and store it in the same folder where you store the Rproj file. <br><br>
-**[Here](https://colab.research.google.com/drive/1Ty2jK_JZo9hANAWXg-d_PRV8dKVx4P51?usp=sharing)** is a **link to an interactive version of this tutorial on Google Colab**. The interactive tutorial is based on a Jupyter notebook of this tutorial. This interactive Jupyter notebook allows you to execute code yourself and - if you copy the Jupyter notebook - you can also change and edit the notebook, e.g. you can change code and upload your own data.<br></p>
+The entire R Notebook for the tutorial can be downloaded  via https://github.com/MartinSchweinberger/AcqVA_PowerR_WS/acqvapwrws.Rmd.  If you want to render the R Notebook on your machine, i.e. knitting the document to html or a pdf, you need to make sure that you have R and RStudio installed and you also need to download the bibliography file (see https://github.com/MartinSchweinberger/AcqVA_DataVisR_WS/bibliography.bib) and store it in the same folder where you store the Rproj file.<br></p>
 <p style='margin-left:1em;'>
 </p></span>
 </div>
@@ -24,7 +23,7 @@ The entire R Notebook for the tutorial can be downloaded [**here**](https://gith
 
 
 
-## What to do before the workshop{-}
+## What to do before the workshop
 
 To get the most out of this workshop, you will need to have some (basic) R skills and (basic) knowledge of how to work with R, RStudio, R Projects, and R Notebooks. If you have no or little experience with this or if you need to refresh your skills, please carefully read (or optimally go through) these tutorials:
 
@@ -64,8 +63,10 @@ You can update R and install these packages by clicking on `packages` on the top
 #library(installr)
 #updateR()
 # install required packages
-install.packages(c("tidyverse", "here",  "pwr", "lme4", "sjPlot", "report", "simr"), 
-                 dependencies = T)
+install.packages("devtools")
+library("devtools")
+install_version("nloptr", version = "1.2.1", repos = "http://cran.us.r-project.org")
+install.packages(c("tidyverse", "pwr", "sjPlot", "lme4", "simr"))
 ```
 
 
@@ -83,11 +84,11 @@ So, in essence, there are the following three options for following this worksho
 
 2. You can follow this workshop in RStudio and execute code, see what it does, understand it, and adapt it. This requires some skills in R and RStudio - although I have trued to keep things simple.
 
-3. You can click on [this link]() which takes you to a Jupyter Notebook on Google Colab (and you are then ready to go - you only  have to install the packages which takes a couple of minutes). You can then copy that Notebook and save it in your own Google Drive and then execute code, modify it, and understand it. This does require less skills and will be easier for people who just want to focus on the code that produces certain visualizations without doing it in RStudio. Also, this get rid of most technical issues (hopefully) but the installation of packages will take a while and you will need to re-install the packages every time you want to re-use the Jupyter Notebook.
+3. You can use the Jupyter Notebook on Google Colab to follow the workshop (and you are then ready to go - you only  have to install the packages which takes a couple of minutes). You can then copy that Notebook and save it in your own Google Drive and then execute code, modify it, and understand it. This does require less skills and will be easier for people who just want to focus on the code that produces certain visualizations without doing it in RStudio. Also, this get rid of most technical issues (hopefully) but the installation of packages will take a while and you will need to re-install the packages every time you want to re-use the Jupyter Notebook.
 
 Choose which option suits you best and then go with it. 
 
-## Timeline{-}
+## Timeline
 
 Here is what we have planned to cover in this workshop:
 
@@ -122,7 +123,7 @@ Tuesday, February 1, 1-3pm
 
 
 
-# Getting started{-}
+# Getting started
 
 If you choose option 2, you need to set up our R session and prepare our R project at the very beginning of the workshop. 
 
@@ -137,14 +138,14 @@ For everything to work, please do the following:
 This will then create an R Project in the project folder.
 
 
-## Theoretical underpinning{-}
+## Theoretical underpinning
 
 
 What is power and why do we need power analyses?
 
 Let's have a look at some distributions to understand what is going on...
 
-## Effect size{-}
+## Effect size
 
 And let's start with varying effect size.
 
@@ -177,7 +178,7 @@ Now, lets have a look at at the distribution of two different groups (group has 
 
 **If variability and sample size remain constant, larger effects are easier to detect than smaller effects!**
 
-## Sample size{-}
+## Sample size
 
 And let's now look at sample size.
 
@@ -194,7 +195,7 @@ Let us now increase the sample size to N = 50.
 
 **If variability and effect size remain constant, effects are easier to detect with increasing sample size!**
 
-## Variability{-}
+## Variability
 
 And let's now look at variability.
 
@@ -233,7 +234,7 @@ What power analysis allow us to do is to calculate at what sample size we would 
 
 <br>
 
-# Today's Data{-}
+# Today's Data
 
 
 We will use 1 data set that is based on a two data set that was send in by Isabel. 
@@ -249,11 +250,33 @@ Here are summaries of the data sets:
   + SentenceType: 2 levels, namely *NonSubjectInitial* (n = 240) and *SentenceAdverbials* (n = 240)
 
 
-# Basic Power Analysis{-}
+**To upload the data into Google Colab, do the following**
+
+To be able to load data into Google Colab, you need to click on the folder symbol to the left of the screen:
+
+![Colab Folder Symbol](https://slcladal.github.io/images/ColabFolder.png)
+
+Then on the upload symbol. 
+
+![Colab Upload Symbol](https://slcladal.github.io/images/ColabUpload.png)
+
+
+Next, upload the files you want to use. When you then execute the code (like to code chunk below, you will load the data into this notebook.
+
+
+```{r loadown, echo = T, eval = F, message=FALSE, warning=FALSE}
+regdat <- readRDS("regdat.rda")
+# inspect
+regdat
+```
+
+To apply the code and functions below to your own data, you will need to modify the code chunks and replace the data we use here with your own data object. 
+
+# Basic Power Analysis
 
 Let's start with a simple power analysis to see how power analyses work for simpler or basic statistical tests such as t-test, $\chi$^2^-test, or linear regression.
 
-The `pwr` package [@pwr] implements power analysis as outlined by @cohen1988statistical and  allows to perform power analyses for the following tests (selection):
+The `pwr` package  (Champely 2020) implements power analysis as outlined by Cohen (1988) and  allows to perform power analyses for the following tests (selection):
 
 * balanced one way ANOVA (`pwr.anova.test`) 
 
@@ -271,9 +294,9 @@ For each of these functions, you enter three of the four parameters (effect size
 
 So how does this work? Have a look at the code chunk below.
 
-## Power Analysis for One-Way ANOVAs{-}
+## Power Analysis for One-Way ANOVAs
 
-Let check how to calculate the necessary sample size for each group for a one-way ANOVA that compares 5 groups and that has a power of 0.80 (80 percent), when the effect size is moderate (*f* = 0.25) and the significance level is 0.05 (5 percent). Regarding the effect size *f*, *f* has been categorized as small = .1, medium .25, and large $≥$ 0.4 [see @cohen1988statistical].
+Let check how to calculate the necessary sample size for each group for a one-way ANOVA that compares 5 groups and that has a power of 0.80 (80 percent), when the effect size is moderate (*f* = 0.25) and the significance level is 0.05 (5 percent). Regarding the effect size *f*, *f* has been categorized as small = .1, medium .25, and large $≥$ 0.4 (see Cohen 1988).
 
 ```{r bp01, warning=F, message=F}
 # load package
@@ -300,7 +323,7 @@ pwr.anova.test(k=5,            # 5 groups are compared
 In this case our analysis would only have a power or 66.8 percent. This means that we would only detect a medium sized effect in 66.7 percent of cases (which is considered insufficient).
 
 
-## Power Analysis for GLMs{-}
+## Power Analysis for GLMs
 
 When determining the power of a generalized linear model, we need to provide
 
@@ -314,7 +337,7 @@ When determining the power of a generalized linear model, we need to provide
 
 The values of the parameters in the example below are adapted from the fixed-effects regression example that was used to analyze different teaching styles (see [here](https://slcladal.github.io/regression.html#Example_2:_Teaching_Styles)).
 
-The effect size used here is $f^2$ that has be categorized as follows [see @cohen1988statistical]: small $≥$ 0.02, medium $≥$ 0.15, and large $≥$ 0.35. So in order to determine if the data is sufficient to find a weak effect when comparing 2 groups with 30 participants in both groups (df_numerator_: 2-1; df_denominator_: (30-1) + (30-1)) and a significance level at $\alpha$ = .05, we can use the following code.
+The effect size used here is $f^2$ that has be categorized as follows (see Cohen 1988): small $≥$ 0.02, medium $≥$ 0.15, and large $≥$ 0.35. So in order to determine if the data is sufficient to find a weak effect when comparing 2 groups with 30 participants in both groups (df_numerator_: 2-1; df_denominator_: (30-1) + (30-1)) and a significance level at $\alpha$ = .05, we can use the following code.
 
 
 ```{r pwrglm}
@@ -331,9 +354,9 @@ pwrglm
 The results show that the regression analyses used to evaluate the effectiveness of different teaching styles only had a power of `r pwrglm$power`.
 
 
-## Power Analysis for t-tests{-}
+## Power Analysis for t-tests
 
-For t-tests (both paired and 2-sample t-tests), the effect size measure is Cohen's $d$ that has be categorized as follows [see @cohen1988statistical]: small $≥$ 0.2, medium $≥$ 0.5, and large $≥$ 0.8. 
+For t-tests (both paired and 2-sample t-tests), the effect size measure is Cohen's $d$ that has be categorized as follows (see Cohen 1988): small $≥$ 0.2, medium $≥$ 0.5, and large $≥$ 0.8. 
 
 **Paired t-test**
 
@@ -371,9 +394,9 @@ pwr2t
 Given the data, a weak effect in this design can only be detected with a certainty of `r pwr2t$power` percent. This means that we would need to substantively increase the sample size to detect a small effect with this design.
 
 
-## Power Analysis for $\chi$^2^-tests{-}
+## Power Analysis for $\chi$^2^-tests
 
-Let us now check the power of a $\chi^2$^-test. For $\chi^2$^-test, the effect size measure used in the power analysis is $w$ that has be categorized as follows [see @cohen1988statistical]: small $≥$ 0.1, medium $≥$ 0.3, and large $≥$ 0.5. Also, keep in mind that for $\chi^2$^-tests, at least 80 percent of cells need to have values $≥$ 5 and none of the cells should have expected values smaller than 1 [see @bortz109verteilungsfreie]. 
+Let us now check the power of a $\chi^2$^-test. For $\chi^2$^-test, the effect size measure used in the power analysis is $w$ that has be categorized as follows (see Cohen 1988): small $≥$ 0.1, medium $≥$ 0.3, and large $≥$ 0.5. Also, keep in mind that for $\chi^2$^-tests, at least 80 percent of cells need to have values $≥$ 5 and none of the cells should have expected values smaller than 1 (see Bortz, Lienert, and Boehnke 1990).. 
 
 
 
@@ -414,18 +437,18 @@ Here are the commands we used to help you:
 
 
 
-# Advanced Power Analysis{-}
+# Advanced Power Analysis
 
-The basis for the present tutorial is @green2016simr (which you can find [here](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12504)). @green2016simr is a highly recommendable and thorough tutorial on performing power analysis in R. Recommendable literature on this topic are, e.g. @arnold2011simulation and @johnson2015power and [this tutorial](https://www.journalofcognition.org/articles/10.5334/joc.10/). 
+The basis for the present tutorial is Green and MacLeod (2016b) (which you can find [here](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12504)). Green and MacLeod (2016b) is a highly recommendable and thorough tutorial on performing power analysis in R. Recommendable literature on this topic are, e.g. Arnold et al. (2011)  and Johnson et al. (2015)  and [this tutorial](https://www.journalofcognition.org/articles/10.5334/joc.10/). 
 
 
 
-Before we conduct a study, we should figure out, what sample we need to detect a small/medium effect with medium variability so that our model is sufficient to detect this kind of effect. In order to do this, we would generate a data set that mirrors the kind of data that we expect to get (with the properties that we expect to get). We can then fit a model to this data and check if a model would be able to detect the expected effect. However, because a single model does not tell us that much (ift could simply be luck that it happened to find the effect), we run many different models on variations of the data and see how many of them find the effect. As a general rule of thumb, we want a data set that allows a model to find a medium sized effect with at least an accuracy of 80 percent [@field2007making].
+Before we conduct a study, we should figure out, what sample we need to detect a small/medium effect with medium variability so that our model is sufficient to detect this kind of effect. In order to do this, we would generate a data set that mirrors the kind of data that we expect to get (with the properties that we expect to get). We can then fit a model to this data and check if a model would be able to detect the expected effect. However, because a single model does not tell us that much (ift could simply be luck that it happened to find the effect), we run many different models on variations of the data and see how many of them find the effect. As a general rule of thumb, we want a data set that allows a model to find a medium sized effect with at least an accuracy of 80 percent (Field et al. 2007).
 
 In the following, we will go through how to determine what sample size we need for an example analysis.
 
 
-## Preparation and session set up{-}
+## Preparation and session set up
 
 As we we have installed the packages, we can activate them as shown below.
 
@@ -434,19 +457,18 @@ As we we have installed the packages, we can activate them as shown below.
 library(tidyverse)
 library(lme4)
 library(sjPlot)
-library(report)
 library(simr)
 ```
 
 Once you have installed R and RStudio and initiated the session by executing the code shown above, you are good to go.
 
-## Using piloted data and a lmer{-}
+## Using piloted data and a lmer
 
 Load data
 
 ```{r reg01, message=FALSE, warning=FALSE}
 # load data
-regdat <- readRDS(here::here("data", "regdat.rda"))
+regdat <- readRDS("regdat.rda")
 # inspect
 head(regdat, 10);str(regdat)
 ```
@@ -464,7 +486,7 @@ table(regdat$Sentence)
 We could also add a response variable (but not now ;) )
 
 
-### Generating the model{-}
+### Generating the model
 
 Set effects and specify model parameters
 
@@ -506,7 +528,7 @@ sjPlot::tab_model(m1)
 
 **The summary table shows that the effects are correct but none of them are reported as being significant!**
 
-### Power analysis{-}
+### Power analysis
 
 Let us now check if the data is sufficient to detect the interaction between `Group` and `Sentence_type`.
 
@@ -531,7 +553,7 @@ estimatesfixedeffects <- fixef(m1)
 exp(estimatesfixedeffects)
 ```
 
-We will now check the effect size which can be interpreted according to @chen2010big [see also @cohen1988statistical].
+We will now check the effect size which can be interpreted according to Chen, Cohen, and Chen (2010; see also Cohen 1988).
 
 * small effect (Cohen's d 0.2, OR = 1.68)
 
@@ -539,7 +561,7 @@ We will now check the effect size which can be interpreted according to @chen201
 
 * strong effect  (Cohen's d 0.8, OR = 6.71)
 
-### Power analysis for interactions{-}
+### Power analysis for interactions
 
 Power Analysis: let's check if the data set has enough power to detect a weak effect for `Group * SentenceType`.
 
@@ -554,12 +576,12 @@ sim_gst
 **The data is not sufficient to detect a weak effect of `Group * SentenceType` with `r sim_gst$x` percent accuracy**
 
 
-## Extending Data{-}
+## Extending Data
 
 We will now extend the data to see how many participants and sentences you need.
 
 
-### Adding sentences{-}
+### Adding sentences
 
 ```{r ext01, message=F, warning=F}
 m1_as <- simr::extend(m1,
@@ -593,7 +615,7 @@ plot(pcurve_m1_as_gst)
 ```
 
 
-### Checking participants{-}
+### Checking participants
 
 What about increasing the number of participants?
 
@@ -640,7 +662,7 @@ pcurve_m2_wo <- simr::powerCurve(m2,
 plot(pcurve_m2_wo)
 ```
 
-## Generating data and a glmer{-}
+## Generating data and a glmer
 
 In order to perform a  power analysis, we will start by loading the tidyverse package to process the data and by generating a data that we will use to determine the power of a regression model.
 
@@ -696,7 +718,7 @@ head(exdat, 20)
 
 
 
-### Generating the model{-}
+### Generating the model
 
 Set effects and specify model parameters
 
@@ -739,9 +761,9 @@ rsim_m4_c <- powerSim(m4, fixed("ConditionTest", "z"), nsim=20)
 rsim_m4_c
 ```
 
-## Extending the data{-}
+## Extending the data
 
-### Adding Items{-}
+### Adding Items
 
 * 2 Conditions
 
@@ -773,7 +795,7 @@ pcurve_m4_ai_c <- powerCurve(m4_ai,
 plot(pcurve_m4_ai_c)
 ```
 
-### Adding subjects{-}
+### Adding subjects
 
 * 2 Conditions
 
@@ -834,7 +856,7 @@ pcurve_m4_asi_c <- powerCurve(m4_asi_c,
 plot(pcurve_m4_asi_c)
 ```
 
-### Adding subjects and items{-}
+### Adding subjects and items
 
 * 2 Conditions
 
@@ -870,14 +892,14 @@ pcurve_m4_asi_c <- powerCurve(m4_asi,
 plot(pcurve_m4_asi_c)
 ```
 
-# Post-Hoc Analyses{-}
+# Post-Hoc Analyses
 
 We now turn to post-hoc power analyses.
 
 <div class="warning" style='padding:0.1em; background-color:#f2f2f2; color:#51247a'>
 <span>
 <p style='margin-top:1em; text-align:center'>
-<b>NOTE</b><br>Power analysis have also been used post-hoc to test if the sample size of studies was sufficient to detect meaningful effects. However, such post-hoc power calculations where the target effect size comes from the data, give misleading results [@hoenig2001abuse; @perugini2018practical] and should thus be treated with extreme care!</p>
+<b>NOTE</b><br>Power analysis have also been used post-hoc to test if the sample size of studies was sufficient to detect meaningful effects. However, such post-hoc power calculations where the target effect size comes from the data, give misleading results (Hoenig and Heisey 2001; Perugini, Gallucci, and Costantini 2018)  and should thus be treated with extreme care!</p>
 <p style='margin-left:1em;'>
 </p></span>
 </div>
@@ -929,7 +951,7 @@ Now, we perform power analysis on an observed effect. This analysis tells us how
 <div class="warning" style='padding:0.1em; background-color:#f2f2f2; color:#51247a'>
 <span>
 <p style='margin-top:1em; text-align:center'>
-<b>NOTE</b><br>We use a very low number of simulations (10) and we use the default z-test which is suboptimal for small samples [@bolker2009generalized]. In a proper study, you should increase the number of simulations (to at least 1000) and you should use a bootstrapping rather than a z-test [cf. @halekoh2014kenward].</p>
+<b>NOTE</b><br>We use a very low number of simulations (10) and we use the default z-test which is suboptimal for small samples (Bolker et al. 2009). In a proper study, you should increase the number of simulations (to at least 1000) and you should use a bootstrapping rather than a z-test (cf. Halekoh, Højsgaard, and others 2014). </p>
 <p style='margin-left:1em;'>
 </p></span>
 </div>
@@ -951,7 +973,7 @@ rsim0
 ```
 
 
-The results of the power analysis show that, given the data at hand, the model would have detected the effect of `Conidition:Test` with a probability of `r rsim0$x` percent. However, and as stated above, the results of such post-hoc power calculations (where the target effect size comes from the data) give misleading results [@hoenig2001abuse] and should thus be treated with extreme care!
+The results of the power analysis show that, given the data at hand, the model would have detected the effect of `Conidition:Test` with a probability of `r rsim0$x` percent. However, and as stated above, the results of such post-hoc power calculations (where the target effect size comes from the data) give misleading results (Hoenig and Heisey 2001)  and should thus be treated with extreme care!
 
 # Fixing effects
 
@@ -1011,7 +1033,7 @@ rsim2
 
 
 
-# Wrap-up and Resources{-}
+# Wrap-up and Resources
 
 If you want to know more, please have a look/go at the following resources:
 
@@ -1027,7 +1049,7 @@ If you want to know more, please have a look/go at the following resources:
 
 That's all folks!
 
-# Citation & Session Info {-}
+# Citation & Session Info 
 
 Schweinberger, Martin. `r format(Sys.time(), '%Y')`. *Introduction to Power Analysis with R - AcqVA Aurora workshop*. Tromsø: The Arctic University of Norway, Tromsø. url: https://github.com/MartinSchweinberger/AcqVA_PowerR_WS/acqvapwrws.html.
 
@@ -1039,5 +1061,31 @@ sessionInfo()
 
 
 
-# References {-}
+# References 
+
+Arnold, Benjamin F, Daniel R Hogan, John M Colford, and Alan E Hubbard. 2011. Simulation Methods to Estimate Design Power: An Overview for Applied Research. *British Medical Journal Medical Research Methodology* 11(1): 1–10.
+
+Bolker, Benjamin M, Mollie E Brooks, Connie J Clark, Shane W Geange, John R Poulsen, M Henry H Stevens, and Jada-Simone S White. 2009. Generalized Linear Mixed Models: A Practical Guide for Ecology and Evolution. *Trends in Ecology & Evolution* 24(3): 127–35.
+
+Bortz, J, GA Lienert, and K Boehnke. 1990. *Verteilungsfreie Methoden in der Biostatistik*. Berlin: Springer Verlag.
+
+Champely, Stephane. 2020. *Pwr: Basic Functions for Power Analysis*. https://CRAN.R-project.org/package=pwr.
+
+Chen, Henian, Patricia Cohen, and Sophie Chen. 2010. How Big Is a Big Odds Ratio? Interpreting the Magnitudes of Odds Ratios in Epidemiological Studies. *Communications in Statistics–Simulation and Computation* 39(4): 860–64.
+
+Cohen, Jacob. 1988. *Statistical Power Analysis for the Behavioral Sciences*. Hillsdale, NJ: Erlbaum.
+
+Field, Scott A, Patrick J O’Connor, Andrew J Tyre, and Hugh P Possingham. 2007. Making Monitoring Meaningful. *Australian Ecology* 32(5): 485–91.
+
+Green, Peter, and Catriona J. MacLeod. 2016a. Simr: An R Package for Power Analysis of Generalised Linear Mixed Models by Simulation. *Methods in Ecology and Evolution* 7(4): 493–98. https://doi.org/10.1111/2041-210X.12504.
+
+Green, Peter, and Catriona J MacLeod. 2016b. SIMR: An R Package for Power Analysis of Generalized Linear Mixed Models by Simulation. *Methods in Ecology and Evolution* 7(4): 493–98.
+
+Halekoh, Ulrich, Søren Højsgaard, and others. 2014. A Kenward-Roger Approximation and Parametric Bootstrap Methods for Tests in Linear Mixed Models–the R Package Pbkrtest. *Journal of Statistical Software* 59(9): 1–30.
+
+Hoenig, John M, and Dennis M Heisey. 2001. The Abuse of Power: The Pervasive Fallacy of Power Calculations for Data Analysis. *The American Statistician* 55(1): 19–24.
+
+Johnson, Paul CD, Sarah JE Barry, Heather M Ferguson, and Pie Müller. 2015. Power Analysis for Generalized Linear Mixed Models in Ecology and Evolution. *Methods in Ecology and Evolution* 6(2): 133–42.
+
+Perugini, Marco, Marcello Gallucci, and Giulio Costantini. 2018. A Practical Primer to Power Analysis for Simple Experimental Designs. *International Review of Social Psychology* 31(1): 1–23.
 
