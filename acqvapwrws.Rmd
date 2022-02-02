@@ -61,6 +61,8 @@ Before attending the workshop, you need to install the following packages in RSt
 
 * `simr` (for power analyses for glmms)
 
+* `effectsize` (for effect size extraction)
+
 * `knitr` (for knitting R Notebooks)
 
 * `markdown` (for rendering Rmd files)
@@ -78,7 +80,7 @@ You can update R and install these packages by clicking on `packages` on the top
 #library(installr)
 #updateR()
 # install required packages
-install.packages(c("tidyverse", "here",  "pwr", "lme4", "sjPlot", "report", "simr"), 
+install.packages(c("tidyverse", "here",  "pwr", "lme4", "sjPlot", "report", "simr", "effectsize"), 
                  dependencies = T)
 ```
 
@@ -166,34 +168,34 @@ And let's start with varying effect size.
 ![2 groups from 1 distribution, N = 30](https://raw.githubusercontent.com/MartinSchweinberger/AcqVAPowerRWS/main/images/dist01.png)
 
 
+Note that the means are not identical and we would assume that there may actually be a difference between the groups (i.e., that they are sampled from two different populations). In such cases (and assuming that we actually do not know the population parameters as we do here), we cannot determine if the insignificant result reported by the t-test is due there being no effect or that the result is insignificant because the sample(s) are too small!
+
 Now, lets have a look at at the distribution of two different groups (group has a weak effect, Cohen's *d* = .2)
 
 
 ![2 groups from 2 distribution (weak effect, N = 30)](https://raw.githubusercontent.com/MartinSchweinberger/AcqVAPowerRWS/main/images/dist02.png)
 
+Here, there is actually a difference between the populations form which we have sampled the groups but the t-test fails to confirm that there is a significant difference between the groups (because of the small sample size, the weak effect size, and the variability in the data).
+
 Now, lets have a look at at the distribution of two different groups (group has a medium effect, Cohen's *d* = .5)
 
 ![2 groups from 2 distribution (medium effect, N = 30)](https://raw.githubusercontent.com/MartinSchweinberger/AcqVAPowerRWS/main/images/dist03.png)
 
-
+Here we see that the t-test is actually able to detect the difference (meaning that the sample size was sufficient to detect a medium effect **in this case**. However, how often and with what certainty would the test confirm a significant difference if we continued to draw samples form these two distributions? We do not know if we just got lucky or if we would be able to detect the difference with confidence.
 
 
 Now, lets have a look at at the distribution of two different groups (group has a strong effect, Cohen's *d* = .8)
 
 ![2 groups from 2 distribution (strong effect, N = 30)](https://raw.githubusercontent.com/MartinSchweinberger/AcqVAPowerRWS/main/images/dist04.png)
 
+Here the situation is pretty clear cut and given the strong effect, the t-test is able to confirm the difference. Given the substantive difference in the means, it would be very likely that a t-test would repeatedly confirm this difference if we continued to draw samples. 
 
 
-Now, lets have a look at at the distribution of two different groups (group has a very strong effect, Cohen's *d* = 1.2)
-
-![2 groups from 2 distribution (very strong effect, N = 30)](https://raw.githubusercontent.com/MartinSchweinberger/AcqVAPowerRWS/main/images/dist05.png)
-
-
-**If variability and sample size remain constant, larger effects are easier to detect than smaller effects!**
+**From the above, we can conclude that if variability and sample size remain constant, larger effects are easier to detect than smaller effects!**
 
 ## Sample size{-}
 
-And let's now look at sample size.
+And let's now look at sample size. In a first example, we draw two samples of 30 observations each. The populations from which the samples are drawn differ with a medium effect size for the difference between groups.
 
 ![2 groups from 2 distribution (medium effect, N = 30)](https://raw.githubusercontent.com/MartinSchweinberger/AcqVAPowerRWS/main/images/dist06.png)
 
@@ -420,12 +422,65 @@ Here are the commands we used to help you:
 
 * $\chi^2$-test: `pwr.chisq.test(w=0.2, N = 25,  df = 1, sig.level=0.05)`
 
+**Solution**
+
 ```{r expwr1, eval = F}
+pwr.anova.test(k=5, f=.25, sig.level=.05, p=.8)
 
+pwr.f2.test(u = 1, f2 = .02, sig.level = 0.05, p = .8)
 
+pwr.t.test(d=0.2, p = .8, sig.level=0.05, type="paired", alternative="two.sided")
 
+pwr.t2n.test(d=0.2, n1=310, n2 = 310, sig.level=0.05, alternative="greater") # by checking N values
+
+pwr.chisq.test(w=0.2, p = .8,  df = 1, sig.level=0.05)
 ```
 
+## Excursion: Language is never random{-}
+
+In 2005, Adam @kilgarriff2005language made a point that *Language is never, ever, ever, random*. Here is part of the abstract: 
+
+> Language users never choose words randomly, and language is essentially non-random. Statistical hypothesis testing uses a null hypothesis, which posits randomness. Hence, when we look at linguistic phenomena in corpora, the null hypothesis will never be true. Moreover, where there is enough data, we shall (almost) always be able to establish that it is not true. In corpus studies, we frequently do have enough data, so the fact that a relation between two phenomena is demonstrably non-random, does not support the inference that it is not arbitrary. We present experimental evidence of how arbitrary associations between word frequencies and corpora are systematically non-random.
+
+This is a problem because if we are using ever bigger corpora, even the tiniest of difference will become significant. have a look at the following example.
+
+
+```{r random01}
+# first let us generate some data
+freqs1 <- matrix(c(10, 28, 30, 92), byrow = T, ncol = 2)
+# inspect data
+freqs1
+```
+
+Now, we perform a simple $\chi^2$-test and extract the effect size.
+
+```{r random02}
+# x2-test
+x21 <- chisq.test(freqs1)
+# inspect results
+x21
+# effect size
+effectsize::effectsize(x21)
+```
+
+the output shows that the difference is not significant and that the effect size is extremely(!) small.
+
+Now, let us simply increase the sample size by a factor of 1000 and also perform a $\chi^2$-test on this extended data set and extract the effect size.
+
+```{r random03}
+# 
+freqs2 <- matrix(c(10000, 28000, 30000, 92000), byrow = T, ncol = 2)
+# first let us generate some data
+x22 <- chisq.test(freqs2)
+# inspect results
+x22
+# effect size
+effectsize::effectsize(x22)
+```
+
+The output shows that the difference is not significant but that the effect size has remain the same. For this reason, in a response to Kilgariff, Stefan [@gries2005kilgariff] suggested to always also report effect size in addition to significance so that the reader has an understanding of whether a significant effect is meaningful. 
+
+This is relevant here because we have focused on the power for finding small effects as these can be considered the smallest *meaningful* effects. However, even tiny effects can be meaningful under certain circumstances - as such, focusing on small effects is only a rule of thumb, should be taken with a pinch of salt, and should be re-evaluated in the context of the study at hand.
 
 
 # Advanced Power Analysis{-}
@@ -493,8 +548,8 @@ Set effects and specify model parameters
 # (Group, Sentence_type, Word_order, and an interaction between Group * Sentence_type)
 fixed <- c(.52, .52, .52, .52, .52)
 # Random intercepts for Sentence and ID
-#rand <- list(0.5, 0.1)
-rand <- list(0.5)
+rand <- list(0.5, 0.1)
+#rand <- list(0.5)
 # res. variance
 res <- 2
 ```
@@ -502,12 +557,16 @@ res <- 2
 Generate model
 
 ```{r reg04, message=F, warning=F}
-#model <- makeLmer(y ~ (1|Sentence) + (1|ID) + Group * Sentence_type + Word_order, fixef=fixed, VarCorr=rand, sigma=res, data=regdat)
-m1 <- makeLmer(y ~ (1|Sentence) + Group * SentenceType + WordOrder, 
+m1 <- makeLmer(y ~ (1|Sentence) + (1|ID) + Group * SentenceType + WordOrder, 
                fixef=fixed, 
                VarCorr=rand, 
                sigma=res, 
                data=regdat)
+#m1 <- makeLmer(y ~ (1|Sentence) + Group * SentenceType + WordOrder, 
+#               fixef=fixed, 
+#               VarCorr=rand, 
+#               sigma=res, 
+#               data=regdat)
 # inspect
 m1
 ```
@@ -522,17 +581,18 @@ sjPlot::tab_model(m1)
 
 ### Power analysis{-}
 
-Let us now check if the data is sufficient to detect the interaction between `Group` and `Sentence_type`.
+Let us now check if the data is sufficient to detect the main effect of `WordOrder`.
 
 ```{r reg06, message=F, warning=F}
 sim_wo <- simr::powerSim(m1, 
-                        nsim=10,
-                        test = fcompare(y ~ WordOrder))
+                        nsim=20,
+                        # compare model with WordOrder to model without WordOrder
+                        test = fcompare(y ~ Group * SentenceType)) 
 # inspect results
 sim_wo
 ```
 
-**The data is sufficient to detect a weak effect of `WordOrder` with `r sim_wo$x` percent accuracy**
+**The data is not sufficient and would only detect a weak effect of `WordOrder` with `r sim_wo$x` percent accuracy**
 
 **Why did I set the estimates to 0.52?**
 
@@ -555,17 +615,18 @@ We will now check the effect size which can be interpreted according to @chen201
 
 ### Power analysis for interactions{-}
 
-Power Analysis: let's check if the data set has enough power to detect a weak effect for `Group * SentenceType`.
+Power Analysis: let's check if the data set has enough power to detect a weak effect for the interaction between `Group * SentenceType`.
 
 ```{r reg10, message=F, warning=F}
 sim_gst <- simr::powerSim(m1, 
-                          nsim=100, 
-                          test = fcompare(y ~ Group * SentenceType))
+                          nsim=20, 
+                          # compare model with interaction to model without interaction
+                          test = fcompare(y ~ WordOrder + Group + SentenceType))
 # inspect
 sim_gst
 ```
 
-**The data is not sufficient to detect a weak effect of `Group * SentenceType` with `r sim_gst$x` percent accuracy**
+**The data is not sufficient and would only detect a weak effect of `Group * SentenceType` with `r sim_gst$x` percent accuracy**
 
 
 ## Extending Data{-}
@@ -578,30 +639,31 @@ We will now extend the data to see how many participants and sentences you need.
 ```{r ext01, message=F, warning=F}
 m1_as <- simr::extend(m1,
                       along="Sentence", 
-                      n=50)
+                      n=120)
 # inspect model
 m1_as
 ```
 
 Check power when using 60 sentences
 
-```{r ext03, message=F, warning=F}
+```{r ext03}
 sim_m1_as_gst <- powerSim(m1_as, 
                    nsim=20, 
-                   test = fcompare(y ~ Group * SentenceType))
+                   test = fcompare(y ~ WordOrder + Group + SentenceType))
 # inspect
 sim_m1_as_gst
 ```
 
+**The data with 120 sentences is  sufficient and would  detect a weak effect of `Group * SentenceType` with `r sim_m1_as_gst$x` percent accuracy**
 
 Plot power curve
 
 ```{r ext04, results='hide', message = FALSE, warning=F}
 pcurve_m1_as_gst <- simr::powerCurve(m1_as, 
-                               test=fcompare(y ~ Group * SentenceType), 
+                               test=fcompare(y ~ WordOrder + Group + SentenceType), 
                                along="Sentence",
                                nsim = 20, 
-                               breaks=seq(10, 50, 10))
+                               breaks=seq(20, 120, 20))
 # show plot
 plot(pcurve_m1_as_gst)
 ```
@@ -611,26 +673,6 @@ plot(pcurve_m1_as_gst)
 
 What about increasing the number of participants?
 
-```{r ext05, message=F, warning=F}
-m2 <- makeLmer(y ~ (1|ID) + Group * SentenceType + WordOrder, 
-               fixef=fixed, 
-               VarCorr=rand, 
-               sigma=res, 
-               data=regdat)
-# inspect
-sjPlot::tab_model(m2)
-```
-
-
-Power analysis
-
-```{r ext08, message=F, warning=F}
-sim_m2_wo <- powerSim(m2, 
-                   nsim=10, 
-                   test = fcompare(y ~ WordOrder))
-# inspect
-sim_m2_wo
-```
 
 An alternative way to perform the simulation
 
@@ -638,21 +680,57 @@ An alternative way to perform the simulation
 # set seed for replicability
 set.seed(12345)
 # perform power analysis for present model
-rsim_m2_wo <- powerSim(m2, fixed("WordOrderV3", "z"), nsim=10)
+rsim_m1_wo <- powerSim(m1, fixed("WordOrderV3", "z"), 
+                       nsim=20)
 # inspect
-rsim_m2_wo
+rsim_m1_wo
 ```
 
 Plotting the power curve.
 
-```{r ext11, results='hide', message = FALSE, warning=F}
-pcurve_m2_wo <- simr::powerCurve(m2, 
-                               test=fcompare(y ~ WordOrder),
+```{r ext11, results='hide'}
+pcurve_m1_gst <- simr::powerCurve(m1, 
+                               test=fcompare(y ~ Group + SentenceType + WordOrder),
                                along = "ID", 
-                               nsim=10)
+                               nsim=20)
 # show plot
-plot(pcurve_m2_wo)
+plot(pcurve_m1_gst)
 ```
+
+
+We increase the number of participants to 120.
+
+```{r ext13, message=F, warning=F}
+m1_ap <- simr::extend(m1,
+                      along="ID", 
+                      n=120)
+# inspect model
+m1_ap
+```
+
+Check power when using 120 participants
+
+```{r ext15}
+sim_m1_ap_gst <- powerSim(m1_ap, 
+                   nsim=20, 
+                   test = fcompare(y ~ WordOrder + Group + SentenceType))
+# inspect
+sim_m1_ap_gst
+```
+
+**The data with 120 participants is  sufficient and would  detect a weak effect of `Group * SentenceType` with `r sim_m1_ap_gst$x` percent accuracy**
+
+
+
+```{r ext17, results='hide'}
+pcurve_m1_ap_gst <- simr::powerCurve(m1_ap, 
+                               test=fcompare(y ~ Group + SentenceType + WordOrder),
+                               along = "ID", 
+                               nsim=20)
+# show plot
+plot(pcurve_m1_ap_gst)
+```
+
 
 ## Generating data and a glmer{-}
 
@@ -680,7 +758,7 @@ simdat <- data.frame(
                 Item = 3) %>%
   dplyr::mutate_if(is.character, factor)
 # inspect
-head(simdat, 15)
+head(simdat, 20)
 ```
 
 
@@ -688,15 +766,11 @@ head(simdat, 15)
 
 Can you create a data set with 5 Subjects, 5 Items (each) for 4 Conditions?
 
-```{r datex1, eval = F}
-
-```
-
 **Solution**
 
 The first 20 rows of the data should look like shown below:
 
-```{r datex2, echo = F}
+```{r datex2}
 # generate data
 Items <- rep(rep(paste0("Item", 1:5), 4), 5)
 Condition <- rep(rep(paste0("Condition", 1:4), each = 5), 5)
@@ -722,24 +796,23 @@ Set effects and specify model parameters
 
 ```{r glmer02, message=F, warning=F}
 # Intercept + slopes for fixed effects 
-# (Group, Sentence_type, Word_order, and an interaction between Group * Sentence_type)
+# (Intercept + Condition)
 fixed <- c(.52, .52)
-# Random intercepts for Sentence and ID
+# Random intercepts for Subjct and Item
 rand <- list(0.5, 0.1)
-#rand <- list(0.5)
 ```
 
 Generate model
 
 
 ```{r glmer03, message=F, warning=F}
-m4 <- simr::makeGlmer(y ~ (1|Subject) + (1|Item) + Condition, 
+m2 <- simr::makeGlmer(y ~ (1|Subject) + (1|Item) + Condition, 
                       family = "binomial", 
                       fixef=fixed, 
                       VarCorr=rand, 
                       data=simdat)
 # inspect
-sjPlot::tab_model(m4)
+sjPlot::tab_model(m2)
 ```
 
 Extract power
@@ -748,9 +821,10 @@ Extract power
 # set seed for replicability
 set.seed(12345)
 # perform power analysis for present model
-rsim_m4_c <- powerSim(m4, fixed("ConditionTest", "z"), nsim=20)
+rsim_m2_c <- powerSim(m2, fixed("ConditionTest", "z"), 
+                      nsim=20)
 # inspect
-rsim_m4_c
+rsim_m2_c
 ```
 
 ## Extending the data{-}
@@ -766,57 +840,54 @@ rsim_m4_c
 (each combination occurs once!)
 
 ```{r glmer06, message=F, warning=F}
-m4_ai <- simr::extend(m4,
+m2_ai <- simr::extend(m2,
                       along="Item", 
                       n=40)
-# inspect model
-sjPlot::tab_model(m4_ai)
 ```
 
 
 Plot power curve
 
-```{r glmer08, message=F, warning=F}
-pcurve_m4_ai_c <- powerCurve(m4_ai, 
+```{r glmer08}
+pcurve_m2_ai_c <- powerCurve(m2_ai, 
                              fixed("ConditionTest", "z"), 
                              along = "Item",
                              nsim = 20,
-                             breaks=seq(10, 40, 5), 
-                             nsim=10)
+                             breaks=seq(10, 40, 5))
 # show plot
-plot(pcurve_m4_ai_c)
+plot(pcurve_m2_ai_c)
 ```
 
 ### Adding subjects{-}
 
 * 2 Conditions
 
+* 40 Subjects (from 10)
+
 * 10 Items
 
-* 40 Subjects (from 10)
 
 (each combination occurs once!)
 
 ```{r glmer10, message=F, warning=F}
-m4_as <- simr::extend(m4,
+m2_as <- simr::extend(m2,
                       along="Subject", 
                       n=40)
 # inspect model
-sjPlot::tab_model(m4_as)
+sjPlot::tab_model(m2_as)
 ```
 
 
 Plot power curve
 
 ```{r glmer12, message=F, warning=F}
-pcurve_m4_as_c <- powerCurve(m4_as, 
+pcurve_m2_as_c <- powerCurve(m2_as, 
                              fixed("ConditionTest", "z"), 
                              along = "Subject",
                              nsim = 20,
-                             breaks=seq(10, 40, 5), 
-                             nsim=10)
+                             breaks=seq(10, 40, 5))
 # show plot
-plot(pcurve_m4_as_c)
+plot(pcurve_m2_as_c)
 ```
 
 How often does each *combination* occur?
@@ -834,18 +905,17 @@ So, what if we increase the number of combinations? (**Repeated Measures Design!
 (But each combination of item and subject now occurs 10 times!)
 
 ```{r glmer14, message=F, warning=F}
-m4_asi_c <- extend(m4, 
+m2_asi_c <- extend(m2, 
                    within="Subject+Item", 
                    n=10)
 # perform power calculation
-pcurve_m4_asi_c <- powerCurve(m4_asi_c, 
+pcurve_m2_asi_c <- powerCurve(m2_asi_c, 
                               fixed("ConditionTest", "z"), 
                               within="Subject+Item",
                               nsim = 20,
-                              breaks=seq(2, 10, 2), 
-                              nsim=10)
+                              breaks=seq(2, 10, 2))
 # show plot
-plot(pcurve_m4_asi_c)
+plot(pcurve_m2_asi_c)
 ```
 
 ### Adding subjects and items{-}
@@ -859,14 +929,14 @@ plot(pcurve_m4_asi_c)
 (each combination occurs once!)
 
 ```{r glmer16, message=F, warning=F}
-m4_as <- simr::extend(m4,
+m2_as <- simr::extend(m2,
                       along="Subject", 
                       n=30)
-m4_asi <- simr::extend(m4_as,
+m2_asi <- simr::extend(m2_as,
                       along="Item", 
                       n=30)
 # inspect model
-sjPlot::tab_model(m4_asi)
+sjPlot::tab_model(m2_asi)
 ```
 
 
@@ -875,13 +945,13 @@ Plot power curve
 *How many subjects do you need if you have 30 Items?*
 
 ```{r glmer18, message=F, warning=F}
-pcurve_m4_asi_c <- powerCurve(m4_asi, 
+pcurve_m2_asi_c <- powerCurve(m2_asi, 
                              fixed("ConditionTest", "z"), 
                              along = "Subject", 
-                             breaks=seq(5, 30, 5), 
-                             nsim=10)
+                             breaks = seq(5, 30, 5), 
+                             nsim = 20)
 # show plot
-plot(pcurve_m4_asi_c)
+plot(pcurve_m2_asi_c)
 ```
 
 # Post-Hoc Analyses{-}
@@ -904,8 +974,8 @@ We begin by adding a response variable to our data. In this case, we vary the re
 simdat2 <- simdat %>%
   dplyr::arrange(Condition) %>%
   dplyr::mutate(
-  AOI = c(sample(c("AOI", "NotAOI"), 100, replace = T, prob = c(.5, .5)),
-           sample(c("AOI", "NotAOI"), 100, replace = T, prob = c(.7, .3)))
+  AOI = c(sample(c("yes", "no"), 100, replace = T, prob = c(.5, .5)),
+           sample(c("yes", "no"), 100, replace = T, prob = c(.7, .3)))
   ) %>%
   dplyr::mutate_if(is.character, factor)
 # inspect
@@ -918,21 +988,23 @@ Now that we have generated some data, we will fit a model to it and perform a po
 
 We will fit a first model to the data. Thus, in a first step, we load the `lme4` package to create a model, set a seed (to save the results and so that the results can be replicated), and then create an initial mixed-effects model.
 
-```{r pwr1, message=F, warning=F}
+```{r glmer22, message=F, warning=F}
 # set seed for replicability
 set.seed(12345)
 # fit model
-m5 <- glmer(AOI ~ (1|Subject) +(1|Item) + Condition, family="binomial", data=simdat2)
+m3 <- glmer(AOI ~ (1|Subject) +(1|Item) + Condition, 
+            family="binomial", 
+            data=simdat2)
 # inspect results
-summary(m5)
+summary(m3)
 ```
 
 We now check the effect sizes of the predictors in the model. We can do this by displaying the results of the model using the `tab_model` function from the `sjPlot` package.
 
 
-```{r pwr5, message=F, warning=F}
+```{r glmer24, message=F, warning=F}
 # tabulate results
-sjPlot::tab_model(m5)
+sjPlot::tab_model(m3)
 ```
 
 
@@ -953,26 +1025,26 @@ Now, we perform power analysis on an observed effect. This analysis tells us how
 
 *What is the probability of finding the observed effect given the data?*
 
-```{r pwr7, results='hide', message = FALSE, warning=F}
+```{r glmer26, results='hide', message = FALSE, warning=F}
 # set seed for replicability
 set.seed(12345)
 # perform power analysis for present model
-rsim0 <- powerSim(m5, 
+m3_pwr <- powerSim(m3, 
                   fixed("ConditionTest", "z"), 
-                  nsim=10)
+                  nsim=20)
 # inspect results
-rsim0
+m3_pwr
 ```
 
 
-The results of the power analysis show that, given the data at hand, the model would have detected the effect of `Conidition:Test` with a probability of `r rsim0$x` percent. However, and as stated above, the results of such post-hoc power calculations (where the target effect size comes from the data) give misleading results [@hoenig2001abuse] and should thus be treated with extreme care!
+The results of the power analysis show that, given the data at hand, the model would have detected the effect of `Conidition:Test` with a probability of `r m3_pwr$x` percent. However, and as stated above, the results of such post-hoc power calculations (where the target effect size comes from the data) give misleading results [@hoenig2001abuse] and should thus be treated with extreme care!
 
 # Fixing effects
 
 We will set the effects that we obtained based on our "observed" data to check if, given the size of the data, we have enough power to detect a small effect of `Condition`. In a first step, we check the observed effects.
 
-```{r pwr9, message=F, warning=F}
-estimatesfixedeffects <- fixef(m5)
+```{r glmer28, message=F, warning=F}
+estimatesfixedeffects <- fixef(m3)
 exp(estimatesfixedeffects)
 ```
 
@@ -981,12 +1053,12 @@ exp(estimatesfixedeffects)
 We can see that the effect is already rather small which makes it very hard to detect an effect. We will now change the size of the effect of ConditionTest to represent a truly small effect, i.e. on the brink of being noise but being just strong enough to be considered small. In other words, we will set the effect so that its odds ratio is exactly 1.68.
 
 
-```{r}
+```{r glmer30, message=F, warning=F}
 # set seed for replicability
 set.seed(12345)
 # perform power analysis for small effect
-fixef(m5)["ConditionTest"] <- 0.519
-estimatesfixedeffects <- fixef(m5)
+fixef(m3)["ConditionTest"] <- 0.519
+estimatesfixedeffects <- fixef(m3)
 exp(estimatesfixedeffects)
 ```
 
@@ -994,42 +1066,56 @@ exp(estimatesfixedeffects)
 
 Perform power analysis
 
-```{r pwr11, results='hide', message = FALSE, warning=F}
+```{r glmer32, results='hide', message = FALSE, warning=F}
 # set seed for replicability
 set.seed(12345)
 # perform power analysis for present model
-rsim0 <- powerSim(m5, 
+m3_pwr_se <- powerSim(m3, 
                   fixed("ConditionTest", "z"), 
                   nsim=20)
 # inspect results
-rsim0
+m3_pwr_se
 ```
+
+**The data is not sufficient and would  detect a weak effect of `Condition` with only `r m3_pwr_se$x` percent accuracy**
 
 # Power Analysis of Extended Data
 
 We will now extend the data to see what sample size is needed to get to the 80 percent accuracy threshold. We begin by increasing the number of items from 10 to 30 to see if this would lead to a sufficient sample size.
 
 
-```{r pwr13, results='hide', message = FALSE, warning=F}
+```{r glmer34, results='hide', message = FALSE, warning=F}
 # increase sample size
-m5_ai <- extend(m5, 
+m3_ai <- extend(m3, 
              along="Item", 
              n=30)
 # perform power simulation
-rsim2 <- powerSim(m5_ai, 
+m3_ai_pwr <- powerSim(m3_ai, 
                   fixed("ConditionTest", "z"), 
-                  nsim=10)
+                  nsim=20)
 # show results
-rsim2
+m3_ai_pwr
 ```
 
+**The data with 30 Items is  sufficient and would  detect a weak effect of `Condition` with  `r m3_ai_pwr$x` percent accuracy**
 
+
+*At what number of sentences are the data sufficient to detect an effect?*
+
+```{r glmer36, message=F, warning=F}
+pcurve_m3_asi_c <- powerCurve(m3_ai, 
+                             fixed("ConditionTest", "z"), 
+                             along = "Item", 
+                             breaks = seq(5, 30, 5), 
+                             nsim = 20)
+# show plot
+plot(pcurve_m3_asi_c)
+```
 
 # Wrap-up and Resources{-}
 
 If you want to know more, please have a look/go at the following resources:
 
-* [Power Analysis in R](https://slcladal.github.io/pwr.html)
 
 * [SIMR: an R package for power analysis of generalized linear mixed models by simulation](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12504)
 
@@ -1038,6 +1124,13 @@ If you want to know more, please have a look/go at the following resources:
 * [Power Analysis with simr](https://humburg.github.io/Power-Analysis/simr_power_analysis.html)
 
 * [Parallelizing simr::powercurve() in R](https://www.r-bloggers.com/2021/07/parallelizing-simrpowercurve-in-r/)
+
+* [Power Analysis in R](https://slcladal.github.io/pwr.html)
+
+Also check out Jacob Westfall's website for [Power Analysis with Crossed Random Effects](https://jakewestfall.shinyapps.io/crossedpower/) based on @westfall2014power.
+
+
+See @baayen2017shadows for power in generalized additive mixed models and why maximal models can be ill-advised. Also, see @matuscheka2017balancing for a simulation study on the detrimental effects of complex random effect structures on power.
 
 That's all folks!
 
