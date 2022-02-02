@@ -549,7 +549,6 @@ Set effects and specify model parameters
 fixed <- c(.52, .52, .52, .52, .52)
 # Random intercepts for Sentence and ID
 rand <- list(0.5, 0.1)
-#rand <- list(0.5)
 # res. variance
 res <- 2
 ```
@@ -562,11 +561,6 @@ m1 <- makeLmer(y ~ (1|Sentence) + (1|ID) + Group * SentenceType + WordOrder,
                VarCorr=rand, 
                sigma=res, 
                data=regdat)
-#m1 <- makeLmer(y ~ (1|Sentence) + Group * SentenceType + WordOrder, 
-#               fixef=fixed, 
-#               VarCorr=rand, 
-#               sigma=res, 
-#               data=regdat)
 # inspect
 m1
 ```
@@ -644,7 +638,7 @@ m1_as <- simr::extend(m1,
 m1_as
 ```
 
-Check power when using 60 sentences
+Check power when using 120 sentences
 
 ```{r ext03}
 sim_m1_as_gst <- powerSim(m1_as, 
@@ -672,31 +666,6 @@ plot(pcurve_m1_as_gst)
 ### Checking participants{-}
 
 What about increasing the number of participants?
-
-
-An alternative way to perform the simulation
-
-```{r ext09, message=F, warning=F}
-# set seed for replicability
-set.seed(12345)
-# perform power analysis for present model
-rsim_m1_wo <- powerSim(m1, fixed("WordOrderV3", "z"), 
-                       nsim=20)
-# inspect
-rsim_m1_wo
-```
-
-Plotting the power curve.
-
-```{r ext11, results='hide'}
-pcurve_m1_gst <- simr::powerCurve(m1, 
-                               test=fcompare(y ~ Group + SentenceType + WordOrder),
-                               along = "ID", 
-                               nsim=20)
-# show plot
-plot(pcurve_m1_gst)
-```
-
 
 We increase the number of participants to 120.
 
@@ -1039,7 +1008,7 @@ m3_pwr
 
 The results of the power analysis show that, given the data at hand, the model would have detected the effect of `Conidition:Test` with a probability of `r m3_pwr$x` percent. However, and as stated above, the results of such post-hoc power calculations (where the target effect size comes from the data) give misleading results [@hoenig2001abuse] and should thus be treated with extreme care!
 
-# Fixing effects
+# Fixing effects{-}
 
 We will set the effects that we obtained based on our "observed" data to check if, given the size of the data, we have enough power to detect a small effect of `Condition`. In a first step, we check the observed effects.
 
@@ -1079,7 +1048,7 @@ m3_pwr_se
 
 **The data is not sufficient and would  detect a weak effect of `Condition` with only `r m3_pwr_se$x` percent accuracy**
 
-# Power Analysis of Extended Data
+# Power Analysis of Extended Data{-}
 
 We will now extend the data to see what sample size is needed to get to the 80 percent accuracy threshold. We begin by increasing the number of items from 10 to 30 to see if this would lead to a sufficient sample size.
 
